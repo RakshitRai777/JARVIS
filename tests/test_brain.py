@@ -1,44 +1,16 @@
 from ai.brain.brain import Brain
-from runtime.runtime import runtime
 
 
-def run():
-
-    print("=" * 60)
-    print("BRAIN TEST")
-    print("=" * 60)
-
-    # Get the shared MemoryService from the Runtime
-    memory_service = runtime.services.get("memory")
-
-    # Start every test with a clean memory store
-    memory_service.clear()
+def test_brain_creation():
 
     brain = Brain()
 
-    tests = [
-        "Remember my favourite colour is blue",
-        "Remember I live in Uttarakhand",
-        "Remember my dog's name is Bruno"
-    ]
+    assert brain is not None
 
-    for text in tests:
+    assert brain.conversations is not None
 
-        print()
-        print(f"USER : {text}")
+    assert brain.context_builder is not None
 
-        reply = brain.chat(text)
+    assert brain.planner is not None
 
-        print(f"JARVIS : {reply}")
-
-    print()
-    print("=" * 60)
-    print("WORKING MEMORY")
-    print("=" * 60)
-
-    for memory in memory_service.get_all():
-
-        print(memory.content)
-
-    print()
-    print("=" * 60)
+    assert brain.executor is not None
