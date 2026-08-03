@@ -1,0 +1,20 @@
+[
+    {
+        "memory_type": "working",
+        "content": "Remember my favourite colour is blue",
+        "created_at": "2026-08-03T15:06:06.824271",
+        "metadata": null
+    },
+    {
+        "memory_type": "working",
+        "content": "Remember I live in Uttarakhand",
+        "created_at": "2026-08-03T15:06:06.867618",
+        "metadata": null
+    },
+    {
+        "memory_type": "working",
+        "content": "Remember my dog's name is Bruno",
+        "created_at": "2026-08-03T15:06:06.901171",
+        "metadata": null
+    }
+]

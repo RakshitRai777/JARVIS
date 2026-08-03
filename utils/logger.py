@@ -1,27 +1,46 @@
 import logging
 from pathlib import Path
 
-# Create logs directory
+# --------------------------------------------------
+# Logs Directory
+# --------------------------------------------------
+
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 
 LOG_FILE = LOG_DIR / "jarvis.log"
 
+# --------------------------------------------------
+# Global Logger
+# --------------------------------------------------
 
-def setup_logger():
-    """
-    Configure the global JARVIS logger.
-    """
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
-        handlers=[
-            logging.FileHandler(LOG_FILE, encoding="utf-8"),
-            logging.StreamHandler()
-        ]
+logger = logging.getLogger("JARVIS")
+
+logger.setLevel(logging.INFO)
+
+# Prevent duplicate messages from propagating
+logger.propagate = False
+
+# --------------------------------------------------
+# Configure only once
+# --------------------------------------------------
+
+if not logger.handlers:
+
+    formatter = logging.Formatter(
+        "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
     )
 
-    return logging.getLogger("JARVIS")
+    file_handler = logging.FileHandler(
+        LOG_FILE,
+        encoding="utf-8"
+    )
 
+    file_handler.setFormatter(formatter)
 
-logger = setup_logger()
+    console_handler = logging.StreamHandler()
+
+    console_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(console_handler)
