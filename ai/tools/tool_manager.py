@@ -5,7 +5,7 @@ from ai.tools.utilities.calculator_tool import CalculatorTool
 
 from ai.tools.system.open_app_tool import OpenAppTool
 from ai.tools.system.close_app_tool import CloseAppTool
-
+from ai.tools.desktop.screenshot_tool import ScreenshotTool
 from ai.tools.filesystem.create_folder_tool import CreateFolderTool
 from ai.tools.browser.open_url_tool import OpenURLTool
 from ai.tools.browser.google_search_tool import GoogleSearchTool
@@ -13,6 +13,9 @@ from ai.tools.browser.youtube_search_tool import YouTubeSearchTool
 from ai.tools.filesystem.create_file_tool import CreateFileTool
 from ai.tools.filesystem.rename_tool import RenameTool
 from ai.tools.filesystem.delete_tool import DeleteTool
+from ai.tools.desktop.clipboard_tool import ClipboardTool
+from ai.tools.desktop.volume_tool import VolumeTool
+from ai.tools.desktop.lock_screen_tool import LockScreenTool
 
 class ToolManager:
     """
@@ -91,6 +94,22 @@ class ToolManager:
 
         self.register(
             DeleteTool()
+        )
+
+        self.register(
+            ScreenshotTool()
+        )
+
+        self.register(
+            ClipboardTool()
+        )
+
+        self.register(
+            VolumeTool()
+        )
+
+        self.register(
+            LockScreenTool()
         )
 
     ############################################################

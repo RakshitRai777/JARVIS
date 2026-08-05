@@ -36,7 +36,7 @@ class CalculatorTool(Tool):
         text = command.lower().strip()
 
         ########################################################
-        # Strong keyword matches
+        # Explicit calculator commands
         ########################################################
 
         keywords = [
@@ -44,8 +44,6 @@ class CalculatorTool(Tool):
             "calculate",
 
             "solve",
-
-            "what is",
 
             "compute",
 
@@ -56,6 +54,18 @@ class CalculatorTool(Tool):
         if any(text.startswith(keyword) for keyword in keywords):
 
             return 100
+
+        ########################################################
+        # "What is" only if followed by mathematics
+        ########################################################
+
+        if text.startswith("what is"):
+
+            expression = self._extract_expression(command)
+
+            if self._looks_like_math(expression):
+
+                return 100
 
         ########################################################
         # Pure mathematical expression
@@ -168,19 +178,11 @@ class CalculatorTool(Tool):
 
             return False
 
-        ########################################################
-        # Only allow numbers, spaces, parentheses and operators
-        ########################################################
-
         pattern = r"^[0-9\s+\-*/%.()]+$"
 
         if not re.fullmatch(pattern, expression):
 
             return False
-
-        ########################################################
-        # Must contain at least one digit
-        ########################################################
 
         return any(ch.isdigit() for ch in expression)
 

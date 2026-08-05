@@ -82,6 +82,10 @@ class ToolIntentClassifier:
         "resume",
         "stop music",
         "volume",
+        "mute",
+        "unmute",
+        "sound",
+        "audio",
 
     }
 
