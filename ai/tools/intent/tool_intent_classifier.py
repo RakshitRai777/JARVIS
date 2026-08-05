@@ -46,6 +46,16 @@ class ToolIntentClassifier:
         "search",
         "visit",
         "website",
+        "google",
+        "youtube",
+        "url",
+        ".com",
+        ".org",
+        ".net",
+        ".io",
+        ".dev",
+        ".ai",
+
 
     }
 

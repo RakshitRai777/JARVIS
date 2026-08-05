@@ -7,20 +7,6 @@ from ai.tools.tool_result import ToolResult
 class Tool(ABC):
     """
     Base class for every JARVIS tool.
-
-    Every tool must implement:
-
-    • can_handle()
-    • execute()
-
-    Example
-    -------
-
-    CalculatorTool
-
-    OpenChromeTool
-
-    ScreenshotTool
     """
 
     ############################################################
@@ -28,9 +14,6 @@ class Tool(ABC):
     @property
     @abstractmethod
     def name(self) -> str:
-        """
-        Human readable name.
-        """
         pass
 
     ############################################################
@@ -38,21 +21,21 @@ class Tool(ABC):
     @property
     @abstractmethod
     def description(self) -> str:
-        """
-        What this tool does.
-        """
         pass
 
     ############################################################
 
     @abstractmethod
-    def can_handle(
+    def match_score(
         self,
         command: str,
-    ) -> bool:
+    ) -> int:
         """
-        Returns True if this tool can execute
-        the given command.
+        Returns how well this tool matches.
+
+        0 = cannot handle
+
+        100 = perfect match
         """
         pass
 
@@ -63,7 +46,4 @@ class Tool(ABC):
         self,
         context: ToolContext,
     ) -> ToolResult:
-        """
-        Execute the tool.
-        """
         pass

@@ -1,3 +1,11 @@
+from ai.tools.intent.tool_intent_classifier import (
+    ToolIntentClassifier,
+)
+
+from ai.tools.resolver.tool_resolver import (
+    ToolResolver,
+)
+
 from ai.tools.tool_context import ToolContext
 from ai.tools.tool_manager import ToolManager
 from ai.tools.tool_result import ToolResult
@@ -9,13 +17,14 @@ class ToolExecutor:
 
     Responsibilities
     ----------------
-    • Find the correct tool
+    • Classify tool intent
+    • Resolve the correct tool
     • Build ToolContext
-    • Execute the tool
+    • Execute the selected tool
     • Return ToolResult
 
-    The executor never knows
-    which tools exist.
+    ToolExecutor never decides which tool
+    should handle a command.
     """
 
     ############################################################
@@ -23,6 +32,14 @@ class ToolExecutor:
     def __init__(self):
 
         self.manager = ToolManager()
+
+        self.intent_classifier = ToolIntentClassifier()
+
+        self.resolver = ToolResolver(
+
+            self.manager.tool_registry
+
+        )
 
     ############################################################
 
@@ -34,10 +51,26 @@ class ToolExecutor:
     ) -> ToolResult:
 
         ########################################################
-        # Find tool
+        # Classify Intent
         ########################################################
 
-        tool = self.manager.find(command)
+        intent = self.intent_classifier.classify(
+
+            command
+
+        )
+
+        ########################################################
+        # Resolve Tool
+        ########################################################
+
+        tool = self.resolver.resolve(
+
+            command,
+
+            intent,
+
+        )
 
         if tool is None:
 
@@ -45,14 +78,14 @@ class ToolExecutor:
 
                 success=False,
 
-                message="I couldn't find a tool to handle that command.",
+                message="I couldn't find a tool to handle that request.",
 
                 error="Tool not found",
 
             )
 
         ########################################################
-        # Build context
+        # Build Context
         ########################################################
 
         context = ToolContext(
@@ -66,12 +99,16 @@ class ToolExecutor:
         )
 
         ########################################################
-        # Execute tool
+        # Execute Tool
         ########################################################
 
         try:
 
-            return tool.execute(context)
+            return tool.execute(
+
+                context
+
+            )
 
         except Exception as e:
 

@@ -40,12 +40,56 @@ class OpenAppTool(Tool):
 
     ############################################################
 
-    def can_handle(
+    def match_score(
         self,
         command: str,
-    ) -> bool:
+    ) -> int:
 
-        return command.lower().startswith("open")
+        text = command.lower().strip()
+
+        ########################################################
+        # Must begin with "open"
+        ########################################################
+
+        if not text.startswith("open"):
+
+            return 0
+
+        ########################################################
+        # URLs belong to OpenURLTool
+        ########################################################
+
+        url_indicators = [
+
+            ".com",
+            ".org",
+            ".net",
+            ".io",
+            ".dev",
+            ".ai",
+            "http://",
+            "https://",
+            "www.",
+
+        ]
+
+        if any(indicator in text for indicator in url_indicators):
+
+            return 5
+
+        ########################################################
+        # Is it a known application?
+        ########################################################
+
+        application = self.database.find(command)
+
+        if application is not None:
+
+            return 100
+
+        ########################################################
+
+        return 10
 
     ############################################################
 
@@ -55,7 +99,9 @@ class OpenAppTool(Tool):
     ) -> ToolResult:
 
         application = self.database.find(
+
             context.command
+
         )
 
         if application is None:
@@ -69,7 +115,9 @@ class OpenAppTool(Tool):
             )
 
         success = self.manager.launch(
+
             application
+
         )
 
         if success:

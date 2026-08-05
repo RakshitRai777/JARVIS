@@ -40,26 +40,48 @@ class CloseAppTool(Tool):
 
     ############################################################
 
-    def can_handle(
+    def match_score(
         self,
         command: str,
-    ) -> bool:
+    ) -> int:
 
-        command = command.lower()
+        text = command.lower().strip()
 
-        return (
+        ########################################################
+        # Close application commands
+        ########################################################
 
-            command.startswith("close")
+        prefixes = [
 
-            or command.startswith("exit")
+            "close",
 
-            or command.startswith("quit")
+            "exit",
 
-            or command.startswith("terminate")
+            "quit",
 
-            or command.startswith("kill")
+            "terminate",
 
-        )
+            "kill",
+
+        ]
+
+        if not any(text.startswith(prefix) for prefix in prefixes):
+
+            return 0
+
+        ########################################################
+        # Known application?
+        ########################################################
+
+        application = self.database.find(command)
+
+        if application is not None:
+
+            return 100
+
+        ########################################################
+
+        return 25
 
     ############################################################
 
@@ -69,7 +91,9 @@ class CloseAppTool(Tool):
     ) -> ToolResult:
 
         application = self.database.find(
+
             context.command
+
         )
 
         if application is None:
@@ -83,7 +107,9 @@ class CloseAppTool(Tool):
             )
 
         success = self.manager.close(
+
             application
+
         )
 
         if success:

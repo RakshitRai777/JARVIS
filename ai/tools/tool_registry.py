@@ -5,10 +5,12 @@ class ToolRegistry:
     """
     Stores every available tool.
 
-    New tools register themselves here.
-
-    The ToolManager discovers tools from
-    this registry.
+    Responsibilities
+    ----------------
+    • Register tools
+    • Unregister tools
+    • Find tools
+    • Expose all registered tools
     """
 
     ############################################################
@@ -38,7 +40,7 @@ class ToolRegistry:
     ):
 
         """
-        Remove a tool by name.
+        Remove a tool.
         """
 
         self._tools = [
@@ -53,13 +55,30 @@ class ToolRegistry:
 
     ############################################################
 
-    def get_tools(self) -> list[Tool]:
+    def all(
+        self,
+    ) -> list[Tool]:
 
         """
-        Return all registered tools.
+        Return every registered tool.
         """
 
         return self._tools.copy()
+
+    ############################################################
+
+    def get_tools(
+        self,
+    ) -> list[Tool]:
+        """
+        Backward compatibility.
+
+        TODO:
+            Remove after migrating
+            all callers to all().
+        """
+
+        return self.all()
 
     ############################################################
 
@@ -70,7 +89,7 @@ class ToolRegistry:
 
         """
         Find the first tool that can
-        execute the command.
+        handle the command.
         """
 
         for tool in self._tools:

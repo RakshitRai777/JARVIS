@@ -1,5 +1,6 @@
 import ast
 import operator
+import re
 
 from ai.tools.tool import Tool
 from ai.tools.tool_context import ToolContext
@@ -9,18 +10,6 @@ from ai.tools.tool_result import ToolResult
 class CalculatorTool(Tool):
     """
     Safe calculator tool.
-
-    Supports:
-
-    +  -  *  /  **  %  //
-
-    Examples
-    --------
-    Calculate 25*16
-
-    What is 81/9?
-
-    9+7*3
     """
 
     ############################################################
@@ -39,28 +28,48 @@ class CalculatorTool(Tool):
 
     ############################################################
 
-    def can_handle(
+    def match_score(
         self,
         command: str,
-    ) -> bool:
+    ) -> int:
 
-        text = command.lower()
+        text = command.lower().strip()
+
+        ########################################################
+        # Strong keyword matches
+        ########################################################
 
         keywords = [
 
             "calculate",
-            "what is",
+
             "solve",
+
+            "what is",
+
+            "compute",
+
+            "evaluate",
 
         ]
 
-        if any(k in text for k in keywords):
+        if any(text.startswith(keyword) for keyword in keywords):
 
-            return True
+            return 100
 
-        operators = "+-*/%"
+        ########################################################
+        # Pure mathematical expression
+        ########################################################
 
-        return any(op in command for op in operators)
+        expression = self._extract_expression(command)
+
+        if self._looks_like_math(expression):
+
+            return 90
+
+        ########################################################
+
+        return 0
 
     ############################################################
 
@@ -70,7 +79,9 @@ class CalculatorTool(Tool):
     ) -> ToolResult:
 
         expression = self._extract_expression(
+
             context.command
+
         )
 
         if not expression:
@@ -86,7 +97,9 @@ class CalculatorTool(Tool):
         try:
 
             result = self._safe_eval(
+
                 expression
+
             )
 
             return ToolResult(
@@ -121,8 +134,14 @@ class CalculatorTool(Tool):
         prefixes = [
 
             "calculate",
+
             "what is",
+
             "solve",
+
+            "compute",
+
+            "evaluate",
 
         ]
 
@@ -138,6 +157,35 @@ class CalculatorTool(Tool):
 
     ############################################################
 
+    def _looks_like_math(
+        self,
+        expression: str,
+    ) -> bool:
+
+        expression = expression.strip()
+
+        if not expression:
+
+            return False
+
+        ########################################################
+        # Only allow numbers, spaces, parentheses and operators
+        ########################################################
+
+        pattern = r"^[0-9\s+\-*/%.()]+$"
+
+        if not re.fullmatch(pattern, expression):
+
+            return False
+
+        ########################################################
+        # Must contain at least one digit
+        ########################################################
+
+        return any(ch.isdigit() for ch in expression)
+
+    ############################################################
+
     def _safe_eval(
         self,
         expression: str,
@@ -146,12 +194,19 @@ class CalculatorTool(Tool):
         operators = {
 
             ast.Add: operator.add,
+
             ast.Sub: operator.sub,
+
             ast.Mult: operator.mul,
+
             ast.Div: operator.truediv,
+
             ast.Pow: operator.pow,
+
             ast.Mod: operator.mod,
+
             ast.FloorDiv: operator.floordiv,
+
             ast.USub: operator.neg,
 
         }
@@ -181,12 +236,17 @@ class CalculatorTool(Tool):
                 )
 
             raise TypeError(
+
                 "Unsupported expression."
+
             )
 
         tree = ast.parse(
+
             expression,
+
             mode="eval",
+
         )
 
         return evaluate(tree.body)
