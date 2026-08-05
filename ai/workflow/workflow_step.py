@@ -1,24 +1,20 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from ai.execution.execution_policy import ExecutionPolicy
+from ai.verification.verification_rule import VerificationRule
+
 
 @dataclass(slots=True)
 class WorkflowStep:
     """
-    Represents a single executable workflow step.
+    Represents one executable workflow step.
 
-    Example
-    -------
+    A WorkflowStep describes:
 
-    ClickText
-
-    TypeText
-
-    PressKey
-
-    Wait
-
-    OpenURL
+    • What to execute
+    • How to execute it
+    • How to verify success
     """
 
     ############################################################
@@ -38,16 +34,20 @@ class WorkflowStep:
     description: str = ""
 
     ############################################################
-
-    verify: bool = True
-
+    # NEW
     ############################################################
 
-    timeout: float = 10.0
+    policy: ExecutionPolicy = field(
+
+        default_factory=ExecutionPolicy
+
+    )
 
     ############################################################
+    # NEW
+    ############################################################
 
-    retry_count: int = 1
+    verification_rule: VerificationRule | None = None
 
     ############################################################
 
