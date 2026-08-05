@@ -1,5 +1,7 @@
 import time
 
+from ai.geometry.screen_region import ScreenRegion
+
 from ai.tools.desktop.desktop_manager import DesktopManager
 
 from ai.tools.vision.ocr_manager import OCRManager
@@ -13,7 +15,8 @@ class VisionManager:
 
     Responsibilities
     ----------------
-    • Capture screenshot
+    • Capture screenshots
+    • Capture region screenshots
     • Perform OCR
     • Preprocess OCR
     • Preserve OCR metadata
@@ -31,60 +34,20 @@ class VisionManager:
         self.preprocessor = VisionPreprocessor()
 
     ############################################################
+    # Internal OCR Pipeline
+    ############################################################
 
-    def read_screen(
+    def _process_image(
         self,
-        image_path: str | None = None,
+        screenshot: str,
     ) -> VisionResult:
-        """
-        Reads text from the current screen or
-        from an existing image.
-
-        Parameters
-        ----------
-        image_path:
-            Optional image path. If omitted,
-            a new screenshot is captured.
-        """
-
-        ########################################################
-        # Start Profiling
-        ########################################################
 
         start_total = time.perf_counter()
-
-        ########################################################
-        # Capture screenshot if needed
-        ########################################################
-
-        screenshot = image_path
-
-        capture_start = time.perf_counter()
-
-        if screenshot is None:
-
-            screenshot = self.desktop.take_screenshot()
-
-        capture_time = time.perf_counter() - capture_start
-
-        if screenshot is None:
-
-            return VisionResult(
-
-                success=False,
-
-                error="Failed to capture screenshot.",
-
-            )
-
-        ########################################################
-        # OCR
-        ########################################################
 
         try:
 
             ####################################################
-            # Extract OCR elements
+            # OCR
             ####################################################
 
             ocr_start = time.perf_counter()
@@ -98,7 +61,7 @@ class VisionManager:
             ocr_time = time.perf_counter() - ocr_start
 
             ####################################################
-            # Build raw text
+            # Build Raw Text
             ####################################################
 
             raw_text = "\n".join(
@@ -110,7 +73,7 @@ class VisionManager:
             )
 
             ####################################################
-            # Preprocess OCR
+            # Preprocess
             ####################################################
 
             pre_start = time.perf_counter()
@@ -124,25 +87,22 @@ class VisionManager:
             pre_time = time.perf_counter() - pre_start
 
             ####################################################
-            # Total Time
+            # Profiling
             ####################################################
 
-            total_time = time.perf_counter() - start_total
+            total = time.perf_counter() - start_total
 
             print()
             print("=" * 60)
             print("VISION PROFILING")
             print("=" * 60)
-            print(f"Screenshot : {capture_time:.2f}s")
             print(f"OCR        : {ocr_time:.2f}s")
             print(f"Preprocess : {pre_time:.2f}s")
             print("-" * 60)
-            print(f"TOTAL      : {total_time:.2f}s")
+            print(f"TOTAL      : {total:.2f}s")
             print("=" * 60)
             print()
 
-            ####################################################
-            # Build VisionResult
             ####################################################
 
             return VisionResult(
@@ -170,3 +130,63 @@ class VisionManager:
                 error=str(e),
 
             )
+
+    ############################################################
+    # Full Screen OCR
+    ############################################################
+
+    def read_screen(
+        self,
+        image_path: str | None = None,
+    ) -> VisionResult:
+
+        if image_path is None:
+
+            image_path = self.desktop.take_screenshot()
+
+        if image_path is None:
+
+            return VisionResult(
+
+                success=False,
+
+                error="Failed to capture screenshot.",
+
+            )
+
+        return self._process_image(
+
+            image_path
+
+        )
+
+    ############################################################
+    # Region OCR
+    ############################################################
+
+    def read_region(
+        self,
+        region: ScreenRegion,
+    ) -> VisionResult:
+
+        image_path = self.desktop.take_region_screenshot(
+
+            region
+
+        )
+
+        if image_path is None:
+
+            return VisionResult(
+
+                success=False,
+
+                error="Failed to capture region.",
+
+            )
+
+        return self._process_image(
+
+            image_path
+
+        )

@@ -1,7 +1,7 @@
 import ctypes
 from pathlib import Path
 from datetime import datetime
-
+from ai.geometry.screen_region import ScreenRegion
 import pyperclip
 
 from PIL import ImageGrab
@@ -72,10 +72,7 @@ class DesktopManager:
 
     def take_region_screenshot(
         self,
-        left: int,
-        top: int,
-        width: int,
-        height: int,
+        region: ScreenRegion,
         directory: str = "screenshots",
     ) -> str | None:
         """
@@ -99,17 +96,7 @@ class DesktopManager:
 
             image = ImageGrab.grab(
 
-                bbox=(
-
-                    left,
-
-                    top,
-
-                    left + width,
-
-                    top + height,
-
-                )
+                bbox=region.as_bbox()
 
             )
 

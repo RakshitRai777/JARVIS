@@ -12,6 +12,9 @@ class OCRVerifier(Verifier):
     Supports:
         • text_exists
         • text_not_exists
+
+    Automatically performs region OCR when a
+    ScreenRegion is supplied in the VerificationRule.
     """
 
     ############################################################
@@ -35,10 +38,22 @@ class OCRVerifier(Verifier):
     ) -> VerificationResult:
 
         ########################################################
-        # Read Screen
+        # Read Screen or Region
         ########################################################
 
-        vision_result = self.vision.read_screen()
+        if rule.region is None:
+
+            vision_result = self.vision.read_screen()
+
+        else:
+
+            vision_result = self.vision.read_region(
+
+                rule.region
+
+            )
+
+        ########################################################
 
         if not vision_result.success:
 
@@ -56,27 +71,75 @@ class OCRVerifier(Verifier):
         # OCR Text
         ########################################################
 
-        screen_text = vision_result.cleaned_text.lower()
+        screen_text = vision_result.cleaned_text
 
         expected = str(
 
             rule.expected
 
-        ).lower()
+        )
+
+        ########################################################
+        # Ignore Case
+        ########################################################
+
+        if rule.ignore_case:
+
+            screen_text = screen_text.lower()
+
+            expected = expected.lower()
 
         ########################################################
         # Verify
         ########################################################
 
-        if expected in screen_text:
+        if rule.rule_type == "text_exists":
+
+            if expected in screen_text:
+
+                return VerificationResult(
+
+                    success=True,
+
+                    message=f"Verified '{rule.expected}'.",
+
+                    confidence=1.0,
+
+                )
 
             return VerificationResult(
 
-                success=True,
+                success=False,
 
-                message=f"Verified '{rule.expected}'.",
+                error=f"'{rule.expected}' not found.",
 
-                confidence=1.0,
+                confidence=0.0,
+
+            )
+
+        ########################################################
+
+        if rule.rule_type == "text_not_exists":
+
+            if expected not in screen_text:
+
+                return VerificationResult(
+
+                    success=True,
+
+                    message=f"Verified '{rule.expected}' is absent.",
+
+                    confidence=1.0,
+
+                )
+
+            return VerificationResult(
+
+                success=False,
+
+                error=f"'{rule.expected}' was found.",
+
+                confidence=0.0,
 
             )
 
@@ -86,7 +149,7 @@ class OCRVerifier(Verifier):
 
             success=False,
 
-            error=f"'{rule.expected}' not found.",
+            error=f"Unsupported verification rule '{rule.rule_type}'.",
 
             confidence=0.0,
 
