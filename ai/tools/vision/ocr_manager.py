@@ -1,11 +1,14 @@
 import easyocr
 
+from ai.tools.vision.ocr_element import OCRElement
+
 
 class OCRManager:
     """
-    Handles Optical Character Recognition (OCR).
+    Handles Optical Character Recognition.
 
-    Loads the OCR model once and reuses it.
+    Loads the OCR model once and returns
+    structured OCR elements.
     """
 
     ############################################################
@@ -22,17 +25,66 @@ class OCRManager:
 
     ############################################################
 
-    def extract_text(
+    def extract_elements(
         self,
         image_path: str,
-    ) -> str:
+    ) -> list[OCRElement]:
+
+        """
+        Returns every OCR detection.
+        """
 
         results = self.reader.readtext(
 
             image_path,
 
-            detail=0,
+            detail=1,
 
         )
 
-        return "\n".join(results)
+        elements = []
+
+        for bbox, text, confidence in results:
+
+            elements.append(
+
+                OCRElement(
+
+                    text=text,
+
+                    confidence=float(confidence),
+
+                    bbox=bbox,
+
+                )
+
+            )
+
+        return elements
+
+    ############################################################
+
+    def extract_text(
+        self,
+        image_path: str,
+    ) -> str:
+        """
+        Convenience wrapper.
+
+        Returns plain text built from OCR
+        elements.
+        """
+
+        elements = self.extract_elements(
+
+            image_path
+
+        )
+
+        return "\n".join(
+
+            element.text
+
+            for element in elements
+
+        )

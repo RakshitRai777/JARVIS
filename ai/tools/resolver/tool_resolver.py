@@ -11,8 +11,8 @@ class ToolResolver:
     The ToolIntentClassifier determines the
     high-level intent.
 
-    The ToolResolver asks every registered tool
-    how confident it is, then selects the
+    The ToolResolver then asks every eligible
+    tool how confident it is and selects the
     highest-scoring tool.
     """
 
@@ -42,12 +42,12 @@ class ToolResolver:
             return None
 
         ########################################################
-        # Find best matching tool
+        # Resolve best tool
         ########################################################
 
         best_tool = None
 
-        best_score = 0
+        best_score = -1
 
         for tool in self.registry.all():
 
@@ -59,6 +59,18 @@ class ToolResolver:
 
                 score = 0
 
+            ####################################################
+            # Uncomment during debugging
+            ####################################################
+            #
+            # print(
+            #     f"{tool.name:<25} "
+            #     f"Intent={intent.name:<12} "
+            #     f"Score={score}"
+            # )
+            #
+            ####################################################
+
             if score > best_score:
 
                 best_score = score
@@ -66,5 +78,9 @@ class ToolResolver:
                 best_tool = tool
 
         ########################################################
+
+        if best_score <= 0:
+
+            return None
 
         return best_tool

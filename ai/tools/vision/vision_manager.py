@@ -1,18 +1,21 @@
 from ai.tools.desktop.desktop_manager import DesktopManager
 
 from ai.tools.vision.ocr_manager import OCRManager
+from ai.tools.vision.vision_preprocessor import VisionPreprocessor
 from ai.tools.vision.vision_result import VisionResult
 
 
 class VisionManager:
     """
-    Coordinates the Vision pipeline.
+    Central Vision Engine.
 
     Responsibilities
     ----------------
     • Capture screenshot
     • Perform OCR
-    • Return structured result
+    • Preprocess OCR
+    • Preserve OCR metadata
+    • Return structured VisionResult
     """
 
     ############################################################
@@ -23,17 +26,34 @@ class VisionManager:
 
         self.ocr = OCRManager()
 
+        self.preprocessor = VisionPreprocessor()
+
     ############################################################
 
     def read_screen(
         self,
+        image_path: str | None = None,
     ) -> VisionResult:
+        """
+        Reads text from the current screen or
+        from an existing image.
+
+        Parameters
+        ----------
+        image_path:
+            Optional image path. If omitted,
+            a new screenshot is captured.
+        """
 
         ########################################################
-        # Capture screenshot
+        # Capture screenshot if needed
         ########################################################
 
-        screenshot = self.desktop.take_screenshot()
+        screenshot = image_path
+
+        if screenshot is None:
+
+            screenshot = self.desktop.take_screenshot()
 
         if screenshot is None:
 
@@ -51,17 +71,51 @@ class VisionManager:
 
         try:
 
-            text = self.ocr.extract_text(
+            ####################################################
+            # Extract OCR elements
+            ####################################################
+
+            elements = self.ocr.extract_elements(
 
                 screenshot
 
             )
 
+            ####################################################
+            # Build raw text
+            ####################################################
+
+            raw_text = "\n".join(
+
+                element.text
+
+                for element in elements
+
+            )
+
+            ####################################################
+            # Preprocess OCR
+            ####################################################
+
+            cleaned_text = self.preprocessor.preprocess(
+
+                raw_text
+
+            )
+
+            ####################################################
+            # Build VisionResult
+            ####################################################
+
             return VisionResult(
 
                 success=True,
 
-                text=text,
+                raw_text=raw_text,
+
+                cleaned_text=cleaned_text,
+
+                elements=elements,
 
                 screenshot_path=screenshot,
 

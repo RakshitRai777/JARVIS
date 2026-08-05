@@ -5,26 +5,15 @@ from ai.tools.intent.tool_intent import ToolIntent
 
 class ToolIntentClassifier:
     """
-    Classifies whether a user request is intended
-    for the Tool System.
+    Classifies a user's command into a high-level
+    tool category.
 
-    It does NOT choose the exact tool.
-
-    It only determines the tool category.
-
-    Example
-    -------
-
-    "Calculate 5+5"
-        -> CALCULATOR
-
-    "Open Chrome"
-        -> BROWSER
-
-    "Take a screenshot"
-        -> UTILITY
+    The ToolResolver later selects the best tool
+    within that category.
     """
 
+    ############################################################
+    # Keyword Groups
     ############################################################
 
     SYSTEM_KEYWORDS = {
@@ -41,9 +30,8 @@ class ToolIntentClassifier:
 
     BROWSER_KEYWORDS = {
 
-        "open",
+        "open website",
         "browse",
-        "search",
         "visit",
         "website",
         "google",
@@ -55,7 +43,6 @@ class ToolIntentClassifier:
         ".io",
         ".dev",
         ".ai",
-
 
     }
 
@@ -105,7 +92,7 @@ class ToolIntentClassifier:
 
     ############################################################
 
-    UTILITY_KEYWORDS = {
+    DESKTOP_KEYWORDS = {
 
         "screenshot",
         "capture",
@@ -116,17 +103,32 @@ class ToolIntentClassifier:
 
     ############################################################
 
+    VISION_PREFIXES = (
+
+        "click ",
+        "click on ",
+        "press ",
+        "select ",
+        "find ",
+        "locate ",
+        "where is ",
+        "read screen",
+        "explain screen",
+        "describe screen",
+        "summarize screen",
+
+    )
+
+    ############################################################
+
     VISION_KEYWORDS = {
 
-        "read screen",
-
         "screen",
-
         "ocr",
-
         "extract text",
-
         "scan screen",
+        "understand screen",
+        "what am i looking at",
 
     }
 
@@ -148,12 +150,27 @@ class ToolIntentClassifier:
             return ToolIntent.CALCULATOR
 
         ########################################################
+        # Vision / Desktop Automation
+        ########################################################
+
+        if text.startswith(self.VISION_PREFIXES):
+
+            return ToolIntent.VISION
+
+        if any(
+            keyword in text
+            for keyword in self.VISION_KEYWORDS
+        ):
+
+            return ToolIntent.VISION
+
+        ########################################################
         # System
         ########################################################
 
         if any(
-            word in text
-            for word in self.SYSTEM_KEYWORDS
+            keyword in text
+            for keyword in self.SYSTEM_KEYWORDS
         ):
 
             return ToolIntent.SYSTEM
@@ -163,30 +180,41 @@ class ToolIntentClassifier:
         ########################################################
 
         if any(
-            word in text
-            for word in self.BROWSER_KEYWORDS
+            keyword in text
+            for keyword in self.BROWSER_KEYWORDS
         ):
 
             return ToolIntent.BROWSER
 
         ########################################################
-        # Files
+        # Filesystem
         ########################################################
 
         if any(
-            word in text
-            for word in self.FILE_KEYWORDS
+            keyword in text
+            for keyword in self.FILE_KEYWORDS
         ):
 
             return ToolIntent.FILESYSTEM
+
+        ########################################################
+        # Desktop
+        ########################################################
+
+        if any(
+            keyword in text
+            for keyword in self.DESKTOP_KEYWORDS
+        ):
+
+            return ToolIntent.DESKTOP
 
         ########################################################
         # Media
         ########################################################
 
         if any(
-            word in text
-            for word in self.MEDIA_KEYWORDS
+            keyword in text
+            for keyword in self.MEDIA_KEYWORDS
         ):
 
             return ToolIntent.MEDIA
@@ -196,33 +224,11 @@ class ToolIntentClassifier:
         ########################################################
 
         if any(
-            word in text
-            for word in self.DEVELOPMENT_KEYWORDS
+            keyword in text
+            for keyword in self.DEVELOPMENT_KEYWORDS
         ):
 
             return ToolIntent.DEVELOPMENT
-
-        ########################################################
-        # Vision
-        ########################################################
-
-        if any(
-            word in text
-            for word in self.VISION_KEYWORDS
-        ):
-
-            return ToolIntent.UTILITY
-
-        ########################################################
-        # Utility
-        ########################################################
-
-        if any(
-            word in text
-            for word in self.UTILITY_KEYWORDS
-        ):
-
-            return ToolIntent.UTILITY
 
         ########################################################
 
@@ -234,8 +240,6 @@ class ToolIntentClassifier:
         self,
         text: str,
     ) -> bool:
-
-        text = text.lower().strip()
 
         math_words = {
 
@@ -254,7 +258,7 @@ class ToolIntentClassifier:
             return True
 
         if re.fullmatch(
-            r"[0-9\s\+\-\*/%\(\)\.]+",
+            r"[0-9\s+\-*/%.()]+",
             text,
         ):
 

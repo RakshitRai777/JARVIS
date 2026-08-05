@@ -1,30 +1,66 @@
-from enum import Enum
+from enum import Enum, auto
 
 
 class ToolIntent(Enum):
     """
-    High-level tool categories.
+    High-level categories used by JARVIS to
+    narrow down which family of tools should
+    handle a command.
 
-    The Planner only needs to know
-    whether a request should be handled
-    by the Tool System.
-
-    The ToolExecutor later chooses
-    the exact tool.
+    The ToolResolver is still responsible for
+    selecting the best tool within a category.
     """
 
-    NONE = "none"
+    ############################################################
+    # No Tool
+    ############################################################
 
-    SYSTEM = "system"
+    NONE = auto()
 
-    BROWSER = "browser"
+    ############################################################
+    # Calculator
+    ############################################################
 
-    FILESYSTEM = "filesystem"
+    CALCULATOR = auto()
 
-    CALCULATOR = "calculator"
+    ############################################################
+    # Browser
+    ############################################################
 
-    MEDIA = "media"
+    BROWSER = auto()
 
-    DEVELOPMENT = "development"
+    ############################################################
+    # Filesystem
+    ############################################################
 
-    UTILITY = "utility"
+    FILESYSTEM = auto()
+
+    ############################################################
+    # System
+    ############################################################
+
+    SYSTEM = auto()
+
+    ############################################################
+    # Desktop
+    ############################################################
+
+    DESKTOP = auto()
+
+    ############################################################
+    # Vision
+    ############################################################
+
+    VISION = auto()
+
+    ############################################################
+    # Media
+    ############################################################
+
+    MEDIA = auto()
+
+    ############################################################
+    # Development
+    ############################################################
+
+    DEVELOPMENT = auto()

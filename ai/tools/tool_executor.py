@@ -112,12 +112,21 @@ class ToolExecutor:
 
         except Exception as e:
 
+            import traceback
+            print("\n" + "=" * 80)
+            print("JARVIS TOOL EXCEPTION")
+            print("=" * 80)
+
+            traceback.print_exc()
+
+            print("=" * 80 + "\n")
+
             return ToolResult(
 
                 success=False,
 
-                message=f"{tool.name} failed.",
+                message=str(e),
 
-                error=str(e),
+                error=traceback.format_exc(),
 
             )

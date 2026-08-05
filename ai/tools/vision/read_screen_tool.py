@@ -76,13 +76,13 @@ class ReadScreenTool(Tool):
 
         if result.success:
 
-            if result.text.strip():
+            if result.cleaned_text.strip():
 
                 return ToolResult(
 
                     success=True,
 
-                    message=result.text,
+                    message=result.cleaned_text,
 
                     data=result,
 

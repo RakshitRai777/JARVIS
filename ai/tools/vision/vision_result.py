@@ -1,10 +1,12 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from ai.tools.vision.ocr_element import OCRElement
 
 
 @dataclass
 class VisionResult:
     """
-    Result produced by the Vision system.
+    Result produced by the Vision Engine.
     """
 
     ############################################################
@@ -13,7 +15,19 @@ class VisionResult:
 
     ############################################################
 
-    text: str = ""
+    raw_text: str = ""
+
+    ############################################################
+
+    cleaned_text: str = ""
+
+    ############################################################
+
+    elements: list[OCRElement] = field(
+
+        default_factory=list
+
+    )
 
     ############################################################
 
@@ -22,3 +36,11 @@ class VisionResult:
     ############################################################
 
     error: str = ""
+
+    ############################################################
+
+    metadata: dict = field(
+
+        default_factory=dict
+
+    )

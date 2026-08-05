@@ -17,6 +17,9 @@ from ai.tools.desktop.clipboard_tool import ClipboardTool
 from ai.tools.desktop.volume_tool import VolumeTool
 from ai.tools.desktop.lock_screen_tool import LockScreenTool
 from ai.tools.vision.read_screen_tool import ReadScreenTool
+from ai.tools.vision.explain_screen_tool import ExplainScreenTool
+from ai.tools.vision.find_text_tool import FindTextTool
+from ai.tools.vision.click_text_tool import ClickTextTool
 
 class ToolManager:
     """
@@ -115,6 +118,18 @@ class ToolManager:
 
         self.register(
             ReadScreenTool()
+        )
+
+        self.register(
+            ExplainScreenTool()
+        )
+
+        self.register(
+            FindTextTool()
+        )
+
+        self.register(
+            ClickTextTool()
         )
 
     ############################################################
