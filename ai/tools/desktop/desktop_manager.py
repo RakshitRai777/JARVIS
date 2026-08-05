@@ -1,14 +1,13 @@
 import ctypes
-from pathlib import Path
 from datetime import datetime
-from ai.geometry.screen_region import ScreenRegion
+from pathlib import Path
+
 import pyperclip
-
 from PIL import ImageGrab
+from pycaw.pycaw import AudioUtilities
 
-from pycaw.pycaw import (
-    AudioUtilities,
-)
+from config.settings import settings
+from ai.geometry.screen_region import ScreenRegion
 
 
 class DesktopManager:
@@ -34,7 +33,7 @@ class DesktopManager:
 
     def take_screenshot(
         self,
-        directory: str = "screenshots",
+        directory: str | Path = settings.SCREENSHOT_DIR,
     ) -> str | None:
 
         try:
@@ -73,7 +72,7 @@ class DesktopManager:
     def take_region_screenshot(
         self,
         region: ScreenRegion,
-        directory: str = "screenshots",
+        directory: str | Path = settings.SCREENSHOT_DIR,
     ) -> str | None:
         """
         Captures a screenshot of a specific region.

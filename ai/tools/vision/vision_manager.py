@@ -1,7 +1,7 @@
 import time
 
 from ai.geometry.screen_region import ScreenRegion
-
+from config.settings import settings
 from ai.tools.desktop.desktop_manager import DesktopManager
 
 from ai.tools.vision.ocr_manager import OCRManager
@@ -92,16 +92,19 @@ class VisionManager:
 
             total = time.perf_counter() - start_total
 
-            print()
-            print("=" * 60)
-            print("VISION PROFILING")
-            print("=" * 60)
-            print(f"OCR        : {ocr_time:.2f}s")
-            print(f"Preprocess : {pre_time:.2f}s")
-            print("-" * 60)
-            print(f"TOTAL      : {total:.2f}s")
-            print("=" * 60)
-            print()
+            if settings.VISION_PROFILING:
+                print()
+                print("=" * 60)
+                print("VISION PROFILING")
+                print("=" * 60)
+                print(f"OCR        : {ocr_time:.2f}s")
+                print(f"Preprocess : {pre_time:.2f}s")
+                print("-" * 60)
+                print(f"TOTAL      : {total:.2f}s")
+                print("=" * 60)
+                print()
+
+
 
             ####################################################
 

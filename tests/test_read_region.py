@@ -1,9 +1,23 @@
+from ai.geometry.screen_region import ScreenRegion
+
 from ai.tools.vision.vision_manager import VisionManager
 
 
 def main():
 
     vision = VisionManager()
+
+    region = ScreenRegion(
+
+        left=0,
+
+        top=0,
+
+        width=600,
+
+        height=200,
+
+    )
 
     print()
 
@@ -13,13 +27,7 @@ def main():
 
     result = vision.read_region(
 
-        left=0,
-
-        top=0,
-
-        width=600,
-
-        height=200,
+        region
 
     )
 
