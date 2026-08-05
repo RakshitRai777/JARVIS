@@ -1,49 +1,102 @@
 from ddgs import DDGS
 
+from ai.web.search.search_provider import SearchProvider
 from ai.web.web_result import WebResult
+from ai.web.search.domain_filter import DomainFilter
+from ai.web.search.domain_ranker import DomainRanker
 
 
-class DuckDuckGoSearch:
+class DuckDuckGoSearch(SearchProvider):
     """
-    Performs web searches using DuckDuckGo.
+    DuckDuckGo Search Provider
 
-    This class only searches.
-
-    It does NOT download webpages.
+    Responsibilities
+    ----------------
+    • Search DuckDuckGo
+    • Convert results into WebResult objects
+    • Filter blocked domains
+    • Rank trusted domains
+    • Never return invalid results
     """
+
+    ############################################################
+
+    @property
+    def name(self):
+
+        return "DuckDuckGo"
+
+    ############################################################
 
     def __init__(
+
         self,
-        max_results: int = 5,
+
+        max_results: int = 8,
+
         region: str = "wt-wt",
-        safesearch: str = "moderate"
+
+        safesearch: str = "moderate",
+
     ):
 
         self.max_results = max_results
+
         self.region = region
+
         self.safesearch = safesearch
 
-    ##########################################################
+    ############################################################
 
     def search(
+
         self,
-        query: str
+
+        query: str,
+
     ) -> list[WebResult]:
 
-        results = []
+        print(f"[DuckDuckGo] Searching: {query}")
+
+        results: list[WebResult] = []
 
         try:
 
             with DDGS() as ddgs:
 
                 response = ddgs.text(
+
                     query,
+
                     max_results=self.max_results,
+
                     region=self.region,
-                    safesearch=self.safesearch
+
+                    safesearch=self.safesearch,
+
                 )
 
+                ####################################################
+                # Convert results
+                ####################################################
+
                 for item in response:
+
+                    url = (item.get("href") or "").strip()
+
+                    title = (item.get("title") or "").strip()
+
+                    snippet = (item.get("body") or "").strip()
+
+                    ################################################
+                    # Ignore invalid results
+                    ################################################
+
+                    if not url:
+                        continue
+
+                    if not url.startswith(("http://", "https://")):
+                        continue
 
                     results.append(
 
@@ -51,13 +104,13 @@ class DuckDuckGoSearch:
 
                             success=True,
 
-                            title=item.get("title", ""),
+                            title=title,
 
-                            url=item.get("href", ""),
+                            url=url,
 
-                            snippet=item.get("body", ""),
+                            snippet=snippet,
 
-                            source="DuckDuckGo"
+                            source=self.name,
 
                         )
 
@@ -65,18 +118,60 @@ class DuckDuckGoSearch:
 
         except Exception as e:
 
-            results.append(
+            print(f"[DuckDuckGo] Search failed: {e}")
 
-                WebResult(
+            return []
 
-                    success=False,
+        ########################################################
+        # Remove invalid entries
+        ########################################################
 
-                    error=str(e),
+        results = [
 
-                    source="DuckDuckGo"
+            r
 
-                )
+            for r in results
 
-            )
+            if r.success
+            and r.url
+            and r.url.startswith(("http://", "https://"))
+
+        ]
+
+        ########################################################
+        # Filter domains
+        ########################################################
+
+        results = DomainFilter.filter_results(results)
+
+        ########################################################
+        # Rank domains
+        ########################################################
+
+        results = DomainRanker.rank(results)
+
+        ########################################################
+        # Debug
+        ########################################################
+
+        print()
+
+        print("========== SEARCH RESULTS ==========")
+
+        if not results:
+
+            print("No valid search results.")
+
+        else:
+
+            for i, result in enumerate(results, start=1):
+
+                print(f"{i}. {result.title}")
+
+                print(f"   {result.url}")
+
+                print()
+
+        print("====================================")
 
         return results

@@ -22,6 +22,14 @@ env/
 .env
 .env.*
 
+# Personal data
+data/memory.json
+
+# Runtime caches
+data/cache/
+data/web_cache/
+ai/web/search_cache/
+
 # ----------------------------
 # Logs
 # ----------------------------

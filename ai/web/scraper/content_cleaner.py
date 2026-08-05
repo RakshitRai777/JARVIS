@@ -5,107 +5,204 @@ class ContentCleaner:
     """
     Cleans parsed webpage text.
 
-    Removes:
-    - Wikipedia citations ([1], [25], ...)
-    - [edit]
-    - [citation needed]
-    - Markdown table rows
-    - Multiple spaces
-    - Excessive blank lines
+    Responsibilities
+    ----------------
+    • Remove citations
+    • Remove navigation text
+    • Remove advertisements
+    • Remove metadata
+    • Remove external links section
+    • Remove references section
+    • Normalize whitespace
     """
 
-    def clean(self, text: str) -> str:
+    def clean(
+        self,
+        text: str
+    ) -> str:
 
         if not text:
             return ""
 
-        # ----------------------------------------
+        ########################################################
+        # Normalize line endings
+        ########################################################
+
+        text = text.replace("\r", "")
+
+        ########################################################
         # Remove citation numbers
-        # Example: [1], [25], [123]
-        # ----------------------------------------
+        ########################################################
+
+        # [1]
         text = re.sub(
             r"\[\d+\]",
             "",
-            text,
+            text
         )
 
-        # ----------------------------------------
+        # [ 12 ]
+        text = re.sub(
+            r"\[\s*\d+\s*\]",
+            "",
+            text
+        )
+
+        # Multiline citations:
+        # [
+        # 12
+        # ]
+        text = re.sub(
+            r"\[\s*\n*\s*\d+\s*\n*\s*\]",
+            "",
+            text,
+            flags=re.MULTILINE
+        )
+
+        ########################################################
         # Remove [edit]
-        # ----------------------------------------
+        ########################################################
+
         text = re.sub(
             r"\[edit\]",
             "",
             text,
-            flags=re.IGNORECASE,
+            flags=re.IGNORECASE
         )
 
-        # ----------------------------------------
-        # Remove [citation needed]
-        # ----------------------------------------
-        text = re.sub(
-            r"\[citation needed\]",
-            "",
-            text,
-            flags=re.IGNORECASE,
-        )
+        ########################################################
+        # Remove repeated spaces
+        ########################################################
 
-        # ----------------------------------------
-        # Remove markdown table rows
-        # Example:
-        # | Header |
-        # |-------|
-        # ----------------------------------------
-        text = re.sub(
-            r"^\|.*$",
-            "",
-            text,
-            flags=re.MULTILINE,
-        )
-
-        # ----------------------------------------
-        # Remove markdown separators
-        # ----------------------------------------
-        text = re.sub(
-            r"^-{3,}$",
-            "",
-            text,
-            flags=re.MULTILINE,
-        )
-
-        # ----------------------------------------
-        # Remove multiple spaces/tabs
-        # ----------------------------------------
         text = re.sub(
             r"[ \t]+",
             " ",
-            text,
+            text
         )
 
-        # ----------------------------------------
-        # Remove trailing spaces before newlines
-        # ----------------------------------------
-        text = re.sub(
-            r" *\n",
-            "\n",
-            text,
-        )
+        ########################################################
+        # Remove repeated blank lines
+        ########################################################
 
-        # ----------------------------------------
-        # Collapse multiple blank lines
-        # ----------------------------------------
-        text = re.sub(
-            r"\n\s*\n+",
-            "\n\n",
-            text,
-        )
-
-        # ----------------------------------------
-        # Remove excessive newlines
-        # ----------------------------------------
         text = re.sub(
             r"\n{3,}",
             "\n\n",
-            text,
+            text
+        )
+
+        ########################################################
+        # Remove markdown tables
+        ########################################################
+
+        text = re.sub(
+            r"\|.*?\|",
+            "",
+            text
+        )
+
+        ########################################################
+        # Split into lines
+        ########################################################
+
+        lines = text.splitlines()
+
+        cleaned = []
+
+        ########################################################
+        # Ignore everything after these headings
+        ########################################################
+
+        stop_sections = {
+
+            "references",
+            "external links",
+            "see also",
+            "further reading",
+            "notes",
+            "bibliography"
+
+        }
+
+        ########################################################
+        # Common navigation / promotional lines
+        ########################################################
+
+        blacklist = {
+
+            "courses",
+            "tutorials",
+            "practice",
+            "practice problems",
+            "placement",
+            "job board",
+            "jobs",
+            "share",
+            "facebook",
+            "twitter",
+            "linkedin",
+            "instagram",
+            "youtube",
+            "telegram",
+            "whatsapp",
+            "advertisement",
+            "cookie policy",
+            "privacy policy",
+            "terms of service",
+            "download pdf",
+            "print",
+            "jump to content",
+            "toggle sidebar",
+            "table of contents",
+            "contents"
+
+        }
+
+        ########################################################
+
+        for line in lines:
+
+            line = line.strip()
+
+            if not line:
+                continue
+
+            lower = line.lower()
+
+            ####################################################
+            # Stop parsing after references
+            ####################################################
+
+            if lower in stop_sections:
+                break
+
+            ####################################################
+            # Remove promotional lines
+            ####################################################
+
+            if any(word in lower for word in blacklist):
+                continue
+
+            ####################################################
+            # Ignore tiny UI fragments
+            ####################################################
+
+            if len(line) < 3:
+                continue
+
+            cleaned.append(line)
+
+        ########################################################
+
+        text = "\n\n".join(cleaned)
+
+        ########################################################
+        # Final whitespace normalization
+        ########################################################
+
+        text = re.sub(
+            r"\n{3,}",
+            "\n\n",
+            text
         )
 
         return text.strip()

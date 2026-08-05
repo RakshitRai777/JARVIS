@@ -9,7 +9,11 @@ from ai.memory.extraction.fact_extractor import FactExtractor
 from ai.memory.memory import Memory
 from ai.memory.memory_type import MemoryType
 from ai.planner.planner import Planner
-
+from ai.conversation.query_resolution.conversation_resolver import ConversationResolver
+from ai.web.query_rewriter.query_rewriter import QueryRewriter
+from ai.conversation.contextual_detector import ContextualDetector
+from ai.conversation.contextual_query_rewriter import ContextualQueryRewriter
+from ai.conversation.entity_extraction.entity_extractor import EntityExtractor
 
 class Brain:
     """
@@ -17,14 +21,27 @@ class Brain:
 
     Responsibilities
     ----------------
-    - Receive user input
-    - Manage conversations
-    - Build context
-    - Ask the Planner what to do
-    - Execute the decision
-    - Store assistant responses
-    - Automatically extract user facts
+    • Receive user input
+    • Normalize user input
+    • Manage conversations
+    • Build context
+    • Ask the Planner what to do
+    • Execute the decision
+    • Store assistant responses
+    • Automatically extract user facts
+
+    IMPORTANT
+
+    Brain knows NOTHING about:
+        • Web
+        • RAG
+        • Memory Retrieval
+        • Knowledge Router
+
+    Those belong to lower layers.
     """
+
+    ############################################################
 
     def __init__(self):
 
@@ -38,36 +55,120 @@ class Brain:
 
         self.fact_extractor = FactExtractor()
 
+        self.entity_extractor = EntityExtractor()
+
+        self.query_rewriter = QueryRewriter()
+
+        self.conversation_resolver = ConversationResolver()
+
+        self.context_detector = ContextualDetector()
+
+        self.contextual_rewriter = ContextualQueryRewriter()
+
+    ############################################################
+
     def chat(
         self,
         user_message: str,
         conversation_id: str = "default",
-        metadata=None
+        metadata=None,
     ) -> str:
 
-        # --------------------------------------------------
-        # Get Conversation
-        # --------------------------------------------------
+        ########################################################
+        # Conversation
+        ########################################################
 
         conversation = self.conversations.get(
             conversation_id
         )
-
-        # --------------------------------------------------
-        # Store User Message
-        # --------------------------------------------------
 
         conversation.add(
             "user",
             user_message
         )
 
-        # --------------------------------------------------
+        ########################################################
+        # Resolve conversational references
+        ########################################################
+
+        resolution = self.conversation_resolver.resolve(
+            user_message,
+            conversation,
+        )
+
+        resolved_message = resolution.resolved_query
+
+        if resolution.changed:
+
+            print()
+
+            print("[ConversationResolver]")
+
+            print(f"Original : {resolution.original_query}")
+
+            print(f"Resolved : {resolution.resolved_query}")
+
+            print(f"Reason   : {resolution.reason}")
+
+            print()
+
+        ########################################################
+        # Normalize Query
+        ########################################################
+
+        rewrite = self.query_rewriter.rewrite(
+            resolved_message
+        )
+
+        effective_message = rewrite.rewritten_query
+
+        ########################################################
+        # Context-aware rewriting
+        ########################################################
+
+        if self.context_detector.needs_context(effective_message):
+
+            rewrite2 = self.contextual_rewriter.rewrite(
+                conversation,
+                effective_message,
+            )
+
+            if rewrite2.changed:
+
+                print()
+
+                print("[ContextualRewriter]")
+
+                print(f"Original : {rewrite2.original_query}")
+
+                print(f"Rewritten: {rewrite2.rewritten_query}")
+
+                print(f"Reason   : {rewrite2.reason}")
+
+                print()
+
+            effective_message = rewrite2.rewritten_query
+
+        if rewrite.changed:
+
+            print()
+
+            print("[QueryRewriter]")
+
+            print(f"Original : {rewrite.original_query}")
+
+            print(f"Rewritten: {rewrite.rewritten_query}")
+
+            print(f"Reason   : {rewrite.reason}")
+
+            print()
+
+        ########################################################
         # Planner
-        # --------------------------------------------------
+        ########################################################
 
         decision = self.planner.decide(
-            user_message
+            effective_message
         )
 
         print(
@@ -76,36 +177,63 @@ class Brain:
             f"Reason={decision.reason}"
         )
 
-        # --------------------------------------------------
+        ########################################################
         # Build Context
-        # --------------------------------------------------
+        ########################################################
 
         context = self.context_builder.build(
             conversation=conversation,
-            metadata=metadata
+            original_query=user_message,
+            search_query=effective_message,
+            metadata=metadata,
         )
 
-        # --------------------------------------------------
+        ########################################################
         # Execute
-        # --------------------------------------------------
+        ########################################################
 
         result = self.executor.execute(
             decision,
-            context
+            context,
         )
 
-        # --------------------------------------------------
-        # Store Assistant Reply
-        # --------------------------------------------------
+        ########################################################
+        # Store assistant reply
+        ########################################################
 
         conversation.add(
             "assistant",
             result.message
         )
 
-        # --------------------------------------------------
+        ########################################################
+        # Extract conversation entities
+        ########################################################
+        try:
+            extraction = self.entity_extractor.extract(
+                result.message
+            )
+
+            if extraction.entities:
+                print()
+                print("[EntityExtractor]")
+
+                for entity in extraction.entities:
+                    conversation.entity_memory.add(entity)
+
+                    print(
+                        f"{entity.entity_type.value.upper()} : "
+                        f"{entity.name}"
+                    )
+                print()
+
+        except Exception as e:
+            print("[EntityExtractor] Failed")
+            print(e)
+        
+        ########################################################
         # Automatic Fact Extraction
-        # --------------------------------------------------
+        ########################################################
 
         fact = self.fact_extractor.extract(
             user_message
@@ -119,7 +247,7 @@ class Brain:
 
             if memory_service is not None:
 
-                stored= memory_service.remember(
+                memory_service.remember(
 
                     Memory(
 
@@ -133,8 +261,6 @@ class Brain:
 
                 )
 
-        # --------------------------------------------------
-        # Return
-        # --------------------------------------------------
+        ########################################################
 
         return result.message

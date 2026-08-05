@@ -7,7 +7,8 @@ def cosine_similarity(a, b):
 
 
 def top_k(scores, k):
-
-    order = np.argsort(scores)[::-1]
-
-    return order[:k]
+    return sorted(
+        range(len(scores)),
+        key=lambda i: scores[i],
+        reverse=True
+    )[:k]

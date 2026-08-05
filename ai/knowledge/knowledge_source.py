@@ -3,13 +3,16 @@ from enum import Enum
 
 class KnowledgeSource(Enum):
     """
-    Possible knowledge sources for answering a request.
+    Available knowledge sources.
+
+    The KnowledgeRouter decides which source(s)
+    should be used for a given user request.
     """
 
-    MEMORY = "MEMORY"
+    MEMORY = "memory"
 
-    WEB = "WEB"
+    WEB = "web"
 
-    LLM = "LLM"
+    LLM = "llm"
 
-    NONE = "NONE"
+    HYBRID = "hybrid"

@@ -17,45 +17,39 @@ class SemanticRanker:
 
     ):
 
+        # No chunks to rank
         if not chunks:
-
             return []
 
-        # Embed chunks only once
+        # Generate embeddings only once
         if chunks[0].embedding is None:
-
             EmbeddingModel.embed_chunks(chunks)
 
+        # Embed the user's question
         question_vector = EmbeddingModel.encode(question)
 
         scores = []
 
+        # Compute similarity for every chunk
         for chunk in chunks:
-
-            scores.append(
-
-                cosine_similarity(
-
-                    question_vector,
-
-                    chunk.embedding
-
-                )
-
+            score = cosine_similarity(
+                question_vector,
+                chunk.embedding
             )
 
+            # Store score inside the chunk
+            chunk.score = score
+
+            scores.append(score)
+
+        # Get indices of top scoring chunks
         best = top_k(
-
             scores,
-
             top_results
-
         )
 
+        # Return ranked chunks
         return [
-
             chunks[i]
-
             for i in best
-
         ]

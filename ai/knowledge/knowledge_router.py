@@ -1,73 +1,72 @@
 from ai.knowledge.knowledge_result import KnowledgeResult
 from ai.knowledge.knowledge_source import KnowledgeSource
 
+from ai.planner.knowledge_classifier import (
+    KnowledgeClassifier,
+    KnowledgeSource as PlannerKnowledgeSource,
+)
+
 
 class KnowledgeRouter:
     """
-    Determines where information should come from.
+    Determines where knowledge should come from.
 
-    It DOES NOT retrieve information.
-
-    It only decides the source.
+    The routing decision is delegated entirely to the
+    KnowledgeClassifier so that the Planner and Router
+    always agree.
     """
+
+    ############################################################
+
+    def __init__(self):
+
+        self.classifier = KnowledgeClassifier()
+
+    ############################################################
 
     def route(
         self,
-        message: str
+        message: str,
     ) -> KnowledgeResult:
 
-        text = message.lower().strip()
+        source = self.classifier.classify(message)
 
-        # -------------------------
-        # Memory Questions
-        # -------------------------
+        ########################################################
+        # Memory
+        ########################################################
 
-        memory_prefixes = [
-            "what is my",
-            "what's my",
-            "who am i",
-            "where do i",
-            "what do i"
-        ]
-
-        if any(text.startswith(prefix) for prefix in memory_prefixes):
+        if source == PlannerKnowledgeSource.MEMORY:
 
             return KnowledgeResult(
+
                 source=KnowledgeSource.MEMORY,
-                reason="Personal information requested."
+
+                reason="Knowledge classifier selected memory.",
+
             )
 
-        # -------------------------
-        # Web Questions
-        # -------------------------
+        ########################################################
+        # Web
+        ########################################################
 
-        web_keywords = [
-            "today",
-            "latest",
-            "current",
-            "news",
-            "weather",
-            "stock",
-            "price",
-            "president",
-            "prime minister",
-            "chief minister",
-            "live",
-            "score"
-        ]
-
-        if any(keyword in text for keyword in web_keywords):
+        if source == PlannerKnowledgeSource.WEB:
 
             return KnowledgeResult(
+
                 source=KnowledgeSource.WEB,
-                reason="Current information required."
+
+                reason="Knowledge classifier selected web.",
+
             )
 
-        # -------------------------
-        # Default
-        # -------------------------
+        ########################################################
+        # LLM
+        ########################################################
 
         return KnowledgeResult(
+
             source=KnowledgeSource.LLM,
-            reason="General knowledge."
+
+            reason="Knowledge classifier selected LLM.",
+
         )
