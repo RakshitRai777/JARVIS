@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from ai.geometry.screen_region import ScreenRegion
 
 @dataclass(slots=True)
 class OCRElement:
@@ -89,6 +89,17 @@ class OCRElement:
 
             self.top + self.height // 2,
 
+        )
+
+    ############################################################
+    
+    @property
+    def region(self) -> ScreenRegion:
+        return ScreenRegion(
+            left=self.left,
+            top=self.top,
+            width=self.width,
+            height=self.height,
         )
 
     ############################################################

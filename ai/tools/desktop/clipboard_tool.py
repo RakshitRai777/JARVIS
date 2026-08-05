@@ -2,7 +2,7 @@ from ai.tools.tool import Tool
 from ai.tools.tool_context import ToolContext
 from ai.tools.tool_result import ToolResult
 
-from ai.tools.desktop.desktop_manager import DesktopManager
+from ai.desktop.clipboard import Clipboard
 
 
 class ClipboardTool(Tool):
@@ -14,7 +14,7 @@ class ClipboardTool(Tool):
 
     def __init__(self):
 
-        self.manager = DesktopManager()
+        self.clipboard = Clipboard()
 
     ############################################################
 
@@ -68,7 +68,7 @@ class ClipboardTool(Tool):
         context,
     ) -> ToolResult:
 
-        text = self.manager.get_clipboard()
+        text = self.clipboard.get()
 
         if text is None:
 

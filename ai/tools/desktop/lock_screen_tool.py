@@ -2,7 +2,7 @@ from ai.tools.tool import Tool
 from ai.tools.tool_context import ToolContext
 from ai.tools.tool_result import ToolResult
 
-from ai.tools.desktop.desktop_manager import DesktopManager
+from ai.desktop.lock_screen import LockScreen
 
 
 class LockScreenTool(Tool):
@@ -14,7 +14,7 @@ class LockScreenTool(Tool):
 
     def __init__(self):
 
-        self.manager = DesktopManager()
+        self.lock_screen = LockScreen()
 
     ############################################################
 
@@ -66,7 +66,7 @@ class LockScreenTool(Tool):
         context: ToolContext,
     ) -> ToolResult:
 
-        success = self.manager.lock_screen()
+        success = self.lock_screen.lock()
 
         if success:
 

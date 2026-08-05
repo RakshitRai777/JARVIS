@@ -2,7 +2,7 @@ from ai.tools.tool import Tool
 from ai.tools.tool_context import ToolContext
 from ai.tools.tool_result import ToolResult
 
-from ai.tools.desktop.desktop_manager import DesktopManager
+from ai.desktop.screenshot import Screenshot
 
 
 class ScreenshotTool(Tool):
@@ -14,7 +14,7 @@ class ScreenshotTool(Tool):
 
     def __init__(self):
 
-        self.manager = DesktopManager()
+        self.screenshot = Screenshot()
 
     ############################################################
 
@@ -64,7 +64,7 @@ class ScreenshotTool(Tool):
         context: ToolContext,
     ) -> ToolResult:
 
-        file = self.manager.take_screenshot()
+        file = self.screenshot.capture()
 
         if file:
 

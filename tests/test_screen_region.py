@@ -1,10 +1,10 @@
 from ai.geometry.screen_region import ScreenRegion
-from ai.tools.desktop.desktop_manager import DesktopManager
+from ai.desktop.screenshot import Screenshot
 
 
 def main():
 
-    desktop = DesktopManager()
+    screenshot = Screenshot()
 
     region = ScreenRegion(
 
@@ -18,11 +18,7 @@ def main():
 
     )
 
-    path = desktop.take_region_screenshot(
-
-        region
-
-    )
+    path = screenshot.capture_region(region)
 
     print()
 

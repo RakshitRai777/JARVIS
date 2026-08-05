@@ -1,12 +1,12 @@
 import time
 
-from ai.tools.desktop.desktop_manager import DesktopManager
+from ai.desktop.screenshot import Screenshot
 from ai.tools.vision.vision_manager import VisionManager
-
+from ai.geometry.screen_region import ScreenRegion
 
 def main():
 
-    desktop = DesktopManager()
+    screenshot = Screenshot()
 
     print()
     print("Capturing 600x200 region...")
@@ -14,13 +14,18 @@ def main():
 
     ############################################################
 
-    image = desktop.take_region_screenshot(
-
+    region = ScreenRegion(
         left=0,
-        top=0,
-        width=600,
-        height=200,
 
+        top=0,
+
+        width=600,
+
+        height=200,
+    )
+
+    image = screenshot.capture_region(
+        region
     )
 
     ############################################################

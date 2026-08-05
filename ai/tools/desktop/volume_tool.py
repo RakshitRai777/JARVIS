@@ -4,7 +4,7 @@ from ai.tools.tool import Tool
 from ai.tools.tool_context import ToolContext
 from ai.tools.tool_result import ToolResult
 
-from ai.tools.desktop.desktop_manager import DesktopManager
+from ai.desktop.volume import Volume
 
 
 class VolumeTool(Tool):
@@ -13,7 +13,7 @@ class VolumeTool(Tool):
 
     def __init__(self):
 
-        self.manager = DesktopManager()
+        self.volume = Volume()
 
     ############################################################
 
@@ -69,7 +69,7 @@ class VolumeTool(Tool):
 
         if "mute" in command and "unmute" not in command:
 
-            if self.manager.mute():
+            if self.volume.mute():
 
                 return ToolResult(
 
@@ -83,7 +83,7 @@ class VolumeTool(Tool):
 
         if "unmute" in command:
 
-            if self.manager.unmute():
+            if self.volume.unmute():
 
                 return ToolResult(
 
@@ -107,7 +107,7 @@ class VolumeTool(Tool):
 
             percent = int(match.group(1))
 
-            if self.manager.set_volume(percent):
+            if self.volume.set(percent):
 
                 return ToolResult(
 
@@ -119,7 +119,7 @@ class VolumeTool(Tool):
 
         ########################################################
 
-        volume = self.manager.get_volume()
+        volume = self.volume.get()
 
         if volume >= 0:
 
