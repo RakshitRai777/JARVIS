@@ -22,6 +22,7 @@ from ai.tools.vision.find_text_tool import FindTextTool
 from ai.tools.vision.click_text_tool import ClickTextTool
 from ai.tools.desktop.type_text_tool import TypeTextTool
 from ai.tools.desktop.press_key_tool import PressKeyTool
+from ai.tools.desktop.hotkey_tool import HotkeyTool
 
 class ToolManager:
     """
@@ -136,6 +137,10 @@ class ToolManager:
 
         self.register(
             TypeTextTool()
+        )
+
+        self.register(
+            HotkeyTool()
         )
 
         self.register(
