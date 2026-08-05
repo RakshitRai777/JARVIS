@@ -21,6 +21,7 @@ from ai.tools.vision.explain_screen_tool import ExplainScreenTool
 from ai.tools.vision.find_text_tool import FindTextTool
 from ai.tools.vision.click_text_tool import ClickTextTool
 from ai.tools.desktop.type_text_tool import TypeTextTool
+from ai.tools.desktop.press_key_tool import PressKeyTool
 
 class ToolManager:
     """
@@ -135,6 +136,10 @@ class ToolManager:
 
         self.register(
             TypeTextTool()
+        )
+
+        self.register(
+            PressKeyTool()
         )
 
     ############################################################

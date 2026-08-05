@@ -102,6 +102,7 @@ class ToolIntentClassifier:
         "write",
         "enter",
         "input",
+        "press",
 
     }
 
