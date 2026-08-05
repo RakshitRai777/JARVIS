@@ -1,3 +1,5 @@
+import time
+
 from ai.tools.desktop.desktop_manager import DesktopManager
 
 from ai.tools.vision.ocr_manager import OCRManager
@@ -46,14 +48,24 @@ class VisionManager:
         """
 
         ########################################################
+        # Start Profiling
+        ########################################################
+
+        start_total = time.perf_counter()
+
+        ########################################################
         # Capture screenshot if needed
         ########################################################
 
         screenshot = image_path
 
+        capture_start = time.perf_counter()
+
         if screenshot is None:
 
             screenshot = self.desktop.take_screenshot()
+
+        capture_time = time.perf_counter() - capture_start
 
         if screenshot is None:
 
@@ -75,11 +87,15 @@ class VisionManager:
             # Extract OCR elements
             ####################################################
 
+            ocr_start = time.perf_counter()
+
             elements = self.ocr.extract_elements(
 
                 screenshot
 
             )
+
+            ocr_time = time.perf_counter() - ocr_start
 
             ####################################################
             # Build raw text
@@ -97,11 +113,33 @@ class VisionManager:
             # Preprocess OCR
             ####################################################
 
+            pre_start = time.perf_counter()
+
             cleaned_text = self.preprocessor.preprocess(
 
                 raw_text
 
             )
+
+            pre_time = time.perf_counter() - pre_start
+
+            ####################################################
+            # Total Time
+            ####################################################
+
+            total_time = time.perf_counter() - start_total
+
+            print()
+            print("=" * 60)
+            print("VISION PROFILING")
+            print("=" * 60)
+            print(f"Screenshot : {capture_time:.2f}s")
+            print(f"OCR        : {ocr_time:.2f}s")
+            print(f"Preprocess : {pre_time:.2f}s")
+            print("-" * 60)
+            print(f"TOTAL      : {total_time:.2f}s")
+            print("=" * 60)
+            print()
 
             ####################################################
             # Build VisionResult

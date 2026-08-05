@@ -10,6 +10,7 @@ from pycaw.pycaw import (
     AudioUtilities,
 )
 
+
 class DesktopManager:
     """
     Central manager for desktop operations.
@@ -17,6 +18,7 @@ class DesktopManager:
     Responsibilities
     ----------------
     • Screenshots
+    • Region Screenshots
     • Clipboard
     • Volume
     • Brightness
@@ -59,6 +61,65 @@ class DesktopManager:
         except Exception as e:
 
             print("\nSCREENSHOT ERROR")
+            print(type(e).__name__)
+            print(e)
+
+            raise
+
+    ############################################################
+    # Region Screenshot
+    ############################################################
+
+    def take_region_screenshot(
+        self,
+        left: int,
+        top: int,
+        width: int,
+        height: int,
+        directory: str = "screenshots",
+    ) -> str | None:
+        """
+        Captures a screenshot of a specific region.
+        """
+
+        try:
+
+            folder = Path(directory)
+
+            folder.mkdir(
+                parents=True,
+                exist_ok=True,
+            )
+
+            timestamp = datetime.now().strftime(
+                "%Y%m%d_%H%M%S_%f"
+            )
+
+            file = folder / f"{timestamp}_region.png"
+
+            image = ImageGrab.grab(
+
+                bbox=(
+
+                    left,
+
+                    top,
+
+                    left + width,
+
+                    top + height,
+
+                )
+
+            )
+
+            image.save(file)
+
+            return str(file)
+
+        except Exception as e:
+
+            print("\nREGION SCREENSHOT ERROR")
             print(type(e).__name__)
             print(e)
 
