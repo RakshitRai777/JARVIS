@@ -116,6 +116,22 @@ class ToolIntentClassifier:
 
     ############################################################
 
+    VISION_KEYWORDS = {
+
+        "read screen",
+
+        "screen",
+
+        "ocr",
+
+        "extract text",
+
+        "scan screen",
+
+    }
+
+    ############################################################
+
     def classify(
         self,
         text: str,
@@ -185,6 +201,17 @@ class ToolIntentClassifier:
         ):
 
             return ToolIntent.DEVELOPMENT
+
+        ########################################################
+        # Vision
+        ########################################################
+
+        if any(
+            word in text
+            for word in self.VISION_KEYWORDS
+        ):
+
+            return ToolIntent.UTILITY
 
         ########################################################
         # Utility

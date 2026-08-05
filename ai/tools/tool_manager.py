@@ -16,6 +16,7 @@ from ai.tools.filesystem.delete_tool import DeleteTool
 from ai.tools.desktop.clipboard_tool import ClipboardTool
 from ai.tools.desktop.volume_tool import VolumeTool
 from ai.tools.desktop.lock_screen_tool import LockScreenTool
+from ai.tools.vision.read_screen_tool import ReadScreenTool
 
 class ToolManager:
     """
@@ -110,6 +111,10 @@ class ToolManager:
 
         self.register(
             LockScreenTool()
+        )
+
+        self.register(
+            ReadScreenTool()
         )
 
     ############################################################
