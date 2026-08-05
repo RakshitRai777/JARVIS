@@ -98,6 +98,10 @@ class ToolIntentClassifier:
         "capture",
         "clipboard",
         "camera",
+        "type",
+        "write",
+        "enter",
+        "input",
 
     }
 

@@ -20,6 +20,7 @@ from ai.tools.vision.read_screen_tool import ReadScreenTool
 from ai.tools.vision.explain_screen_tool import ExplainScreenTool
 from ai.tools.vision.find_text_tool import FindTextTool
 from ai.tools.vision.click_text_tool import ClickTextTool
+from ai.tools.desktop.type_text_tool import TypeTextTool
 
 class ToolManager:
     """
@@ -130,6 +131,10 @@ class ToolManager:
 
         self.register(
             ClickTextTool()
+        )
+
+        self.register(
+            TypeTextTool()
         )
 
     ############################################################
