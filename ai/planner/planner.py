@@ -6,6 +6,14 @@ from ai.planner.knowledge_classifier import (
     KnowledgeSource,
 )
 
+from ai.tools.intent.tool_intent_classifier import (
+    ToolIntentClassifier,
+)
+
+from ai.tools.intent.tool_intent import (
+    ToolIntent,
+)
+
 
 class Planner:
     """
@@ -14,7 +22,7 @@ class Planner:
     Priority
     --------
     1. System commands
-    2. Tool commands
+    2. Tool intent
     3. Explicit memory commands
     4. Knowledge classification
     """
@@ -25,16 +33,7 @@ class Planner:
 
         self.knowledge_classifier = KnowledgeClassifier()
 
-        self.tool_keywords = {
-
-            "open",
-            "close",
-            "shutdown",
-            "restart",
-            "search",
-            "play",
-
-        }
+        self.tool_intent_classifier = ToolIntentClassifier()
 
         self.system_commands = {
 
@@ -68,19 +67,23 @@ class Planner:
             )
 
         ########################################################
-        # Tool Commands
+        # Tool Intent
         ########################################################
 
-        if any(
-            text.startswith(word)
-            for word in self.tool_keywords
-        ):
+        tool_intent = self.tool_intent_classifier.classify(
+            text
+        )
+
+        if tool_intent != ToolIntent.NONE:
 
             return Decision(
 
                 action=PlannerAction.TOOL,
 
-                reason="Tool command detected.",
+                reason=(
+                    f"Tool intent detected "
+                    f"({tool_intent.value})."
+                ),
 
             )
 
@@ -102,7 +105,9 @@ class Planner:
         # Knowledge Classification
         ########################################################
 
-        source = self.knowledge_classifier.classify(text)
+        source = self.knowledge_classifier.classify(
+            text
+        )
 
         if source == KnowledgeSource.MEMORY:
 

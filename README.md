@@ -1,9 +1,20 @@
 # JARVIS
 
-Personal AI Operating System
+An autonomous modular AI assistant built in Python.
 
-Status:
-🚧 Under Development
+## Current Features
 
-Current Phase:
-Phase 1 — Foundation
+- Intelligent Planner
+- Semantic Memory
+- Web RAG
+- Hybrid Search
+- Cross Encoder Re-ranking
+- Query Rewriting
+- Entity Extraction
+- Knowledge Routing
+- Contextual Memory
+- Tool Execution (In Progress)
+
+## Status
+
+🚧 Under active development.
