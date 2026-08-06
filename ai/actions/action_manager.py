@@ -1,34 +1,20 @@
 from ai.actions.action_context import ActionContext
 from ai.actions.action_registry import ActionRegistry
 from ai.actions.action_result import ActionResult
-from ai.actions.wait_action import WaitAction
-from ai.actions.type_text_action import TypeTextAction
-from ai.actions.press_key_action import PressKeyAction
 
-from ai.actions.click_text_action import ClickTextAction
 from ai.actions.tool_action import ToolAction
 from ai.actions.wait_action import WaitAction
 from ai.actions.focus_window_action import FocusWindowAction
+from ai.actions.type_text_action import TypeTextAction
+from ai.actions.press_key_action import PressKeyAction
+from ai.actions.click_text_action import ClickTextAction
+
+from ai.execution.execution_context import ExecutionContext
+
 
 class ActionManager:
     """
-    Central execution manager for all workflow actions.
-
-    Responsibilities
-    ----------------
-    • Register actions
-    • Resolve actions
-    • Build ActionContext
-    • Execute actions
-
-    Future responsibilities
-    -----------------------
-    • Verification
-    • Retry
-    • Logging
-    • Metrics
-    • Screenshots
-    • Recovery
+    Central execution manager for workflow actions.
     """
 
     ############################################################
@@ -38,51 +24,34 @@ class ActionManager:
         self.registry = ActionRegistry()
 
         ########################################################
-        # Register Actions
+        # Register actions
         ########################################################
 
-        self.registry.register(
-            ToolAction() 
-        )
-
-        self.registry.register(
-            WaitAction() 
-        )
-
-        self.registry.register(
-            FocusWindowAction()
-        )
-
-        self.registry.register(
-            TypeTextAction()
-        )
-
-        self.registry.register(
-            PressKeyAction()
-        )
-
-        self.registry.register(
-            ClickTextAction()
-        )
+        self.registry.register(ToolAction())
+        self.registry.register(WaitAction())
+        self.registry.register(FocusWindowAction())
+        self.registry.register(TypeTextAction())
+        self.registry.register(PressKeyAction())
+        self.registry.register(ClickTextAction())
 
     ############################################################
 
     def execute(
         self,
-        workflow,
-        step,
-        metadata=None,
+        context: ExecutionContext,
     ) -> ActionResult:
 
         ########################################################
-        # Resolve Action
+        # Resolve action
         ########################################################
 
         action = self.registry.get(
 
-            step.action
+            context.step.action,
 
         )
+
+        ########################################################
 
         if action is None:
 
@@ -90,21 +59,25 @@ class ActionManager:
 
                 success=False,
 
-                error=f"No action registered for '{step.action}'.",
+                error=f"No action registered for '{context.step.action}'.",
 
             )
 
         ########################################################
-        # Build Context
+        # Build ActionContext
         ########################################################
 
-        context = ActionContext(
+        action_context = ActionContext(
 
-            workflow=workflow,
+            workflow=context.workflow,
 
-            step=step,
+            step=context.step,
 
-            metadata=metadata or {},
+            runtime=context.runtime,
+
+            metadata=context.metadata,
+
+            shared_data=context.shared_data,
 
         )
 
@@ -114,6 +87,6 @@ class ActionManager:
 
         return action.execute(
 
-            context
+            action_context,
 
         )

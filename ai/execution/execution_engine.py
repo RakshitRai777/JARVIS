@@ -152,11 +152,7 @@ class ExecutionEngine:
 
         action_result = self.action_manager.execute(
 
-            workflow=resolved_context.workflow,
-
-            step=resolved_context.step,
-
-            metadata=resolved_context.metadata,
+            resolved_context,
 
         )
 

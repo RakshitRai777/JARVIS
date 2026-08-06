@@ -15,13 +15,17 @@ class OCRManager:
 
     def __init__(self):
 
-        self.reader = easyocr.Reader(
+        self.reader = None
 
-            ["en"],
+    ############################################################
 
-            gpu=False,
-
-        )
+    def _get_reader(self):
+        if self.reader is None:
+            self.reader = easyocr.Reader(
+                ["en"],
+                gpu=False,
+            )
+        return self.reader
 
     ############################################################
 
@@ -34,7 +38,7 @@ class OCRManager:
         Returns every OCR detection.
         """
 
-        results = self.reader.readtext(
+        results = self._get_reader().readtext(
 
             image_path,
 

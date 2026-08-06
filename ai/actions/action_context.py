@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any
 
+from ai.runtime.runtime import Runtime
+
 from ai.workflow.workflow import Workflow
 from ai.workflow.workflow_step import WorkflowStep
 
@@ -10,8 +12,8 @@ class ActionContext:
     """
     Context passed to every Action during execution.
 
-    It provides all information an Action needs
-    without coupling it to the WorkflowEngine.
+    It provides everything an Action needs
+    without coupling it to the ExecutionEngine.
     """
 
     ############################################################
@@ -21,6 +23,10 @@ class ActionContext:
     ############################################################
 
     step: WorkflowStep
+
+    ############################################################
+
+    runtime: Runtime
 
     ############################################################
 
