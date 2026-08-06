@@ -7,7 +7,8 @@ from ai.execution.retry_policy import RetryPolicy
 from ai.execution.execution_context import ExecutionContext
 from ai.execution.execution_result import ExecutionResult
 from ai.execution.recovery_engine import RecoveryEngine
-
+from ai.execution.execution_resume_engine import ExecutionResumeEngine
+from ai.execution.execution_checkpoint import ExecutionCheckpoint
 from ai.planner.condition_evaluator import ConditionEvaluator
 
 from ai.runtime.variable_resolver import VariableResolver
@@ -48,6 +49,8 @@ class ExecutionEngine:
         self.retry_engine = RetryEngine()
 
         self.recovery_engine = RecoveryEngine()
+
+        self.resume_engine = ExecutionResumeEngine()
 
     ############################################################
 
@@ -222,6 +225,20 @@ class ExecutionEngine:
                     ),
 
                 )
+
+        checkpoint = ExecutionCheckpoint(
+            workflow=resolved_context.workflow,
+            current_step=resolved_context.attempt,
+
+            total_steps=resolved_context.shared_data.get(
+                "total_steps",
+                1,
+
+            ),
+        )
+        self.resume_engine.save_checkpoint(
+            checkpoint,
+        )
 
         ########################################################
         # Success

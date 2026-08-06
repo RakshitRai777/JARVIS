@@ -1,4 +1,5 @@
 from ai.execution.execution_context import ExecutionContext
+from ai.execution.execution_cursor import ExecutionCursor
 from ai.execution.execution_engine import ExecutionEngine
 from ai.execution.execution_policy import ExecutionPolicy
 from ai.execution.execution_result import ExecutionResult
@@ -64,10 +65,22 @@ class PlanExecutor:
         )
 
         ########################################################
+        # Create execution cursor
+        ########################################################
+
+        cursor = ExecutionCursor(
+
+            plan.steps,
+
+        )
+
+        ########################################################
         # Execute every step
         ########################################################
 
-        for step in plan.steps:
+        while cursor.has_next():
+
+            step = cursor.current()
 
             ####################################################
             # Update runtime
@@ -101,6 +114,14 @@ class PlanExecutor:
 
                 metadata={},
 
+                shared_data={
+
+                    "total_steps": cursor.total_steps,
+
+                },
+
+                attempt=cursor.index + 1,
+
             )
 
             ####################################################
@@ -132,6 +153,12 @@ class PlanExecutor:
             if not result.success:
 
                 return result
+
+            ####################################################
+            # Advance cursor
+            ####################################################
+
+            cursor.next()
 
         ########################################################
         # Success
