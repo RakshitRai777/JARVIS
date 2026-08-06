@@ -2,7 +2,8 @@ import time
 from copy import deepcopy
 
 from ai.actions.action_manager import ActionManager
-
+from ai.execution.retry_engine import RetryEngine
+from ai.execution.retry_policy import RetryPolicy
 from ai.execution.execution_context import ExecutionContext
 from ai.execution.execution_result import ExecutionResult
 
@@ -42,6 +43,8 @@ class ExecutionEngine:
         self.action_manager = ActionManager()
 
         self.verification_manager = VerificationManager()
+
+        self.retry_engine = RetryEngine()
 
     ############################################################
 
@@ -150,10 +153,13 @@ class ExecutionEngine:
         # Execute action
         ########################################################
 
-        action_result = self.action_manager.execute(
+        retry_policy = RetryPolicy()
 
-            resolved_context,
-
+        action_result = self.retry_engine.execute(
+            operation=lambda: self.action_manager.execute(
+                resolved_context,
+            ),
+            policy=retry_policy,
         )
 
         ########################################################
