@@ -2,6 +2,7 @@ from ai.verification.verifier import Verifier
 from ai.verification.verification_rule import VerificationRule
 from ai.verification.verification_result import VerificationResult
 from ai.verification.ocr_verifier import OCRVerifier
+from ai.verification.window_verifier import WindowVerifier
 
 class VerificationManager:
     """
@@ -29,6 +30,10 @@ class VerificationManager:
 
         self.register(
             OCRVerifier()
+        )
+
+        self.register(
+            WindowVerifier()
         )
 
     ############################################################

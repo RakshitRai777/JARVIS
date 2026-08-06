@@ -55,6 +55,27 @@ class KeyboardManager:
             return False
 
     ############################################################
+    # Backward Compatibility
+    ############################################################
+
+    def type(
+        self,
+        text: str,
+        interval: float = 0.02,
+    ) -> bool:
+        """
+        Legacy alias for type_text().
+        """
+
+        return self.type_text(
+
+            text,
+
+            interval,
+
+        )
+
+    ############################################################
 
     def press(
         self,
@@ -77,6 +98,24 @@ class KeyboardManager:
         except Exception:
 
             return False
+
+    ############################################################
+    # Backward Compatibility
+    ############################################################
+
+    def press_key(
+        self,
+        key: str,
+    ) -> bool:
+        """
+        Legacy alias for press().
+        """
+
+        return self.press(
+
+            key,
+
+        )
 
     ############################################################
 
