@@ -1,37 +1,97 @@
-from ai.planner.planning_engine import PlanningEngine
+from ai.agent.reasoning_context import ReasoningContext
+from ai.agent.reasoning_engine import ReasoningEngine
+
+from ai.memory.memory_context import MemoryContext
+
+from ai.planner.planning_context import PlanningContext
+
+
+def run(command, summary):
+
+    planning = PlanningContext(
+
+        command=command,
+
+        memory_context=MemoryContext(),
+
+        memory_summary=summary,
+
+    )
+
+    context = ReasoningContext(
+
+        planning_context=planning,
+
+        objective="Understand user request",
+
+    )
+
+    engine = ReasoningEngine()
+
+    result = engine.reason(
+
+        context,
+
+    )
+
+    print("=" * 60)
+
+    print(command)
+
+    print("=" * 60)
+
+    print("Thought")
+
+    print(result.thought)
+
+    print()
+
+    print("Conclusion")
+
+    print(result.conclusion)
+
+    print()
+
+    print("Confidence")
+
+    print(result.confidence)
+
+    print()
 
 
 def main():
 
-    engine = PlanningEngine()
+    run(
 
-    command = "Open Notepad then type Hello"
+        "Continue FitOS",
 
-    print()
+        "Relevant Memories:\n- Current project is FitOS",
 
-    print(command)
+    )
 
-    print()
+    run(
 
-    plan = engine.build_plan(command)
+        "Continue Unknown Project",
 
-    print("=" * 60)
+        "No relevant memories.",
 
-    print("IMPROVED PLAN")
+    )
 
-    print("=" * 60)
+    run(
 
-    for i, step in enumerate(plan.steps, start=1):
+        "Remember that my favourite editor is VS Code",
 
-        print(f"Step {i}")
+        "No relevant memories.",
 
-        print(step.action)
+    )
 
-        print(step.parameters)
+    run(
 
-        print(step.description)
+        "Open Chrome",
 
-        print("-" * 60)
+        "No relevant memories.",
+
+    )
 
 
 if __name__ == "__main__":
