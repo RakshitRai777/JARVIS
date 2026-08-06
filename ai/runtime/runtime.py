@@ -1,7 +1,7 @@
 from ai.runtime.runtime_state import RuntimeState
 from ai.runtime.runtime_history import RuntimeHistory
 from datetime import datetime
-
+from ai.runtime.runtime_session import RuntimeSession
 from ai.runtime.runtime_history_entry import (
     RuntimeHistoryEntry,
 )
@@ -27,6 +27,8 @@ class Runtime:
 
         self.state = RuntimeState()
 
+        self.session = RuntimeSession()
+
         self.history = RuntimeHistory()
 
     ############################################################
@@ -40,7 +42,11 @@ class Runtime:
 
         self.state = RuntimeState()
 
-        self.history.clear()
+        self.session.end()
+
+        self.session = RuntimeSession()
+
+        self.history = self.session.history
 
     ############################################################
 
@@ -180,3 +186,12 @@ class Runtime:
     ) -> RuntimeHistory:
 
         return self.history
+
+    ############################################################
+    
+    @property
+    def runtime_session(
+        self,
+    ) -> RuntimeSession:
+    
+        return self.session
