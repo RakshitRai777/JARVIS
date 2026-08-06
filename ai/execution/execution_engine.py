@@ -2,17 +2,19 @@ import time
 from copy import deepcopy
 
 from ai.actions.action_manager import ActionManager
-from ai.execution.retry_engine import RetryEngine
-from ai.execution.retry_policy import RetryPolicy
+
 from ai.execution.execution_context import ExecutionContext
 from ai.execution.execution_result import ExecutionResult
-from ai.execution.recovery_engine import RecoveryEngine
-from ai.execution.execution_resume_engine import ExecutionResumeEngine
 from ai.execution.execution_checkpoint import ExecutionCheckpoint
+from ai.execution.execution_resume_engine import ExecutionResumeEngine
+from ai.execution.execution_controller import ExecutionController
+
+from ai.execution.retry_engine import RetryEngine
+from ai.execution.retry_policy import RetryPolicy
+from ai.execution.recovery_engine import RecoveryEngine
+
 from ai.planner.condition_evaluator import ConditionEvaluator
-
 from ai.runtime.variable_resolver import VariableResolver
-
 from ai.verification.verification_manager import VerificationManager
 
 
@@ -26,16 +28,9 @@ class ExecutionEngine:
     • Evaluate execution conditions
     • Execute actions
     • Execute verification
-    • Apply execution policies
+    • Apply retry policies
+    • Save execution checkpoints
     • Return ExecutionResult
-
-    Future Responsibilities
-    -----------------------
-    • Retry
-    • Timeout
-    • Recovery
-    • Waiting
-    • Logging
     """
 
     ############################################################
@@ -52,6 +47,8 @@ class ExecutionEngine:
 
         self.resume_engine = ExecutionResumeEngine()
 
+        self.controller = ExecutionController()
+
     ############################################################
 
     def execute(
@@ -60,6 +57,12 @@ class ExecutionEngine:
     ) -> ExecutionResult:
 
         start = time.perf_counter()
+
+        ########################################################
+        # Execution started
+        ########################################################
+
+        self.controller.start()
 
         ########################################################
         # Work on a copy of the execution step
@@ -81,10 +84,6 @@ class ExecutionEngine:
 
         )
 
-        ########################################################
-        # Resolve all string parameters
-        ########################################################
-
         for key, value in step.parameters.items():
 
             if isinstance(value, str):
@@ -96,7 +95,7 @@ class ExecutionEngine:
                 )
 
         ########################################################
-        # Create condition evaluator
+        # Condition evaluator
         ########################################################
 
         condition_evaluator = ConditionEvaluator(
@@ -141,6 +140,8 @@ class ExecutionEngine:
 
             if not should_execute:
 
+                self.controller.complete()
+
                 return ExecutionResult(
 
                     success=True,
@@ -162,32 +163,53 @@ class ExecutionEngine:
         retry_policy = RetryPolicy()
 
         action_result = self.retry_engine.execute(
+
             operation=lambda: self.action_manager.execute(
+
                 resolved_context,
+
             ),
+
             policy=retry_policy,
+
         )
 
         ########################################################
+        # Action failed
+        ########################################################
 
         if not action_result.success:
+
+            self.controller.fail()
+
             recovery = self.recovery_engine.recover(
+
                 context=resolved_context,
+
                 execution_result=action_result,
+
             )
 
             return ExecutionResult(
+
                 success=False,
+
                 message=action_result.message,
+
                 data=recovery,
+
                 error=action_result.error,
+
                 execution_time=(
+
                     time.perf_counter() - start
+
                 ),
+
             )
 
         ########################################################
-        # Execute verification
+        # Verification
         ########################################################
 
         if (
@@ -206,9 +228,9 @@ class ExecutionEngine:
 
             )
 
-            ####################################################
-
             if not verification.success:
+
+                self.controller.fail()
 
                 return ExecutionResult(
 
@@ -226,23 +248,37 @@ class ExecutionEngine:
 
                 )
 
+        ########################################################
+        # Save checkpoint
+        ########################################################
+
         checkpoint = ExecutionCheckpoint(
+
             workflow=resolved_context.workflow,
+
             current_step=resolved_context.attempt,
 
             total_steps=resolved_context.shared_data.get(
+
                 "total_steps",
+
                 1,
 
             ),
+
         )
+
         self.resume_engine.save_checkpoint(
+
             checkpoint,
+
         )
 
         ########################################################
         # Success
         ########################################################
+
+        self.controller.complete()
 
         return ExecutionResult(
 
