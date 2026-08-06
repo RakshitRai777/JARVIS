@@ -3,6 +3,7 @@ from ai.execution.execution_cursor import ExecutionCursor
 from ai.execution.execution_engine import ExecutionEngine
 from ai.execution.execution_policy import ExecutionPolicy
 from ai.execution.execution_result import ExecutionResult
+from ai.execution.execution_resume_engine import ExecutionResumeEngine
 
 from ai.workflow.workflow import Workflow
 
@@ -35,6 +36,8 @@ class PlanExecutor:
         self.engine = ExecutionEngine()
 
         self.runtime = Runtime()
+
+        self.resume_engine = ExecutionResumeEngine()
 
     ############################################################
 
@@ -73,6 +76,15 @@ class PlanExecutor:
             plan.steps,
 
         )
+
+        #######################################################
+        # Resume execution if a checkpoint exists
+        #######################################################
+
+        if self.resume_engine.has_checkpoint():
+            self.resume_engine.resume_cursor(
+                cursor,
+            )
 
         ########################################################
         # Execute every step

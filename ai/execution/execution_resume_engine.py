@@ -1,4 +1,5 @@
 from ai.execution.execution_checkpoint import ExecutionCheckpoint
+from ai.execution.execution_cursor import ExecutionCursor
 from ai.execution.execution_result import ExecutionResult
 from ai.execution.workflow_resume_result import WorkflowResumeResult
 
@@ -13,11 +14,10 @@ class ExecutionResumeEngine:
     • Retrieve checkpoints
     • Clear checkpoints
     • Report checkpoint availability
-    • Build workflow resume results
+    • Position an ExecutionCursor for workflow resume
 
     Future Responsibilities
     -----------------------
-    • Resume workflow execution
     • Persist checkpoints to disk
     • Restore checkpoints after restart
     """
@@ -63,18 +63,15 @@ class ExecutionResumeEngine:
 
     ############################################################
 
-    def resume(
+    def resume_cursor(
         self,
+        cursor: ExecutionCursor,
     ) -> WorkflowResumeResult:
         """
-        Resume from the latest checkpoint.
+        Position the execution cursor at the saved checkpoint.
 
-        Version 1
-        ---------
-        Returns resume information only.
-
-        Future versions will actually continue
-        workflow execution.
+        This method does not execute any workflow steps.
+        Execution remains the responsibility of PlanExecutor.
         """
 
         ########################################################
@@ -90,6 +87,16 @@ class ExecutionResumeEngine:
             )
 
         ########################################################
+        # Position cursor
+        ########################################################
+
+        cursor.goto(
+
+            self._checkpoint.current_step,
+
+        )
+
+        ########################################################
         # Build execution result
         ########################################################
 
@@ -102,8 +109,52 @@ class ExecutionResumeEngine:
         )
 
         ########################################################
-        # Build resume result
+        # Return resume result
         ########################################################
+
+        return WorkflowResumeResult(
+
+            resumed=True,
+
+            checkpoint=self._checkpoint,
+
+            execution_result=execution,
+
+            resumed_step=cursor.index,
+
+            completed=(
+                cursor.index >= cursor.total_steps
+            ),
+
+        )
+
+    ############################################################
+
+    def resume(
+        self,
+    ) -> WorkflowResumeResult:
+        """
+        Backward-compatible API.
+
+        Returns resume information without requiring
+        an ExecutionCursor.
+        """
+
+        if self._checkpoint is None:
+
+            return WorkflowResumeResult(
+
+                resumed=False,
+
+            )
+
+        execution = ExecutionResult(
+
+            success=True,
+
+            message="Workflow ready to resume.",
+
+        )
 
         return WorkflowResumeResult(
 
