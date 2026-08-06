@@ -1,3 +1,5 @@
+import time
+
 from ai.actions.action import Action
 from ai.actions.action_context import ActionContext
 from ai.actions.action_result import ActionResult
@@ -46,25 +48,48 @@ class FocusWindowAction(Action):
         )
 
         ########################################################
-
-        window = self.manager.find(
-
-            title,
-
-        )
-
+        # Retry configuration
         ########################################################
 
-        if window is None:
+        timeout = 5.0          # seconds
+        interval = 0.25        # seconds
 
-            return ActionResult(
+        start = time.perf_counter()
 
-                success=False,
+        ########################################################
+        # Retry until timeout
+        ########################################################
 
-                message=f"Window '{title}' was not found.",
+        while True:
+
+            window = self.manager.find(
+
+                title,
 
             )
 
+            if window is not None:
+
+                break
+
+            if time.perf_counter() - start >= timeout:
+
+                return ActionResult(
+
+                    success=False,
+
+                    message=f"Window '{title}' was not found.",
+
+                )
+
+            time.sleep(
+
+                interval,
+
+            )
+
+        ########################################################
+        # Activate window
         ########################################################
 
         try:
