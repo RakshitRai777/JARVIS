@@ -4,7 +4,7 @@ from typing import Any
 from ai.execution.execution_policy import ExecutionPolicy
 from ai.workflow.workflow import Workflow
 from ai.workflow.workflow_step import WorkflowStep
-
+from ai.runtime.runtime import Runtime
 
 @dataclass(slots=True)
 class ExecutionContext:
@@ -26,6 +26,10 @@ class ExecutionContext:
     ############################################################
 
     policy: ExecutionPolicy
+
+    ############################################################
+    
+    runtime: Runtime
 
     ############################################################
 

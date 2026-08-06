@@ -1,13 +1,14 @@
 import time
+from copy import deepcopy
 
 from ai.actions.action_manager import ActionManager
 
 from ai.execution.execution_context import ExecutionContext
 from ai.execution.execution_result import ExecutionResult
 
-from ai.verification.verification_manager import (
-    VerificationManager,
-)
+from ai.verification.verification_manager import VerificationManager
+
+from ai.runtime.variable_resolver import VariableResolver
 
 
 class ExecutionEngine:
@@ -19,6 +20,7 @@ class ExecutionEngine:
     • Execute actions
     • Execute verification
     • Apply execution policies
+    • Resolve runtime variables
     • Return ExecutionResult
 
     Future Responsibilities
@@ -47,16 +49,68 @@ class ExecutionEngine:
         start = time.perf_counter()
 
         ########################################################
+        # Work on a copy of the step
+        ########################################################
+
+        step = deepcopy(context.step)
+
+        ########################################################
+        # Resolve runtime variables
+        ########################################################
+
+        resolver = VariableResolver(
+
+            context.runtime.runtime_variables,
+
+        )
+
+        ########################################################
+        # Resolve every string parameter
+        ########################################################
+
+        for key, value in step.parameters.items():
+
+            if isinstance(value, str):
+
+                step.parameters[key] = resolver.resolve(
+
+                    value,
+
+                )
+
+        ########################################################
+        # Create resolved execution context
+        ########################################################
+
+        resolved_context = ExecutionContext(
+
+            workflow=context.workflow,
+
+            step=step,
+
+            policy=context.policy,
+
+            runtime=context.runtime,
+
+            metadata=context.metadata,
+
+            shared_data=context.shared_data,
+
+            attempt=context.attempt,
+
+        )
+
+        ########################################################
         # Execute Action
         ########################################################
 
         action_result = self.action_manager.execute(
 
-            workflow=context.workflow,
+            workflow=resolved_context.workflow,
 
-            step=context.step,
+            step=resolved_context.step,
 
-            metadata=context.metadata,
+            metadata=resolved_context.metadata,
 
         )
 
@@ -73,7 +127,9 @@ class ExecutionEngine:
                 error=action_result.error,
 
                 execution_time=(
+
                     time.perf_counter() - start
+
                 ),
 
             )
@@ -84,17 +140,17 @@ class ExecutionEngine:
 
         if (
 
-            context.policy.verify
+            resolved_context.policy.verify
 
             and
 
-            context.step.verification_rule is not None
+            resolved_context.step.verification_rule is not None
 
         ):
 
             verification = self.verification_manager.verify(
 
-                context.step.verification_rule
+                resolved_context.step.verification_rule
 
             )
 
@@ -111,8 +167,9 @@ class ExecutionEngine:
                     error=verification.error,
 
                     execution_time=(
-                        time.perf_counter()
-                        - start
+
+                        time.perf_counter() - start
+
                     ),
 
                 )
@@ -128,8 +185,9 @@ class ExecutionEngine:
             data=action_result.data,
 
             execution_time=(
-                time.perf_counter()
-                - start
+
+                time.perf_counter() - start
+
             ),
 
         )

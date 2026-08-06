@@ -97,6 +97,8 @@ class PlanExecutor:
 
                 policy=ExecutionPolicy(),
 
+                runtime=self.runtime,
+
                 metadata={},
 
             )
