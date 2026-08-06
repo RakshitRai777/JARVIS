@@ -13,6 +13,9 @@ from ai.execution.retry_engine import RetryEngine
 from ai.execution.retry_policy import RetryPolicy
 from ai.execution.recovery_engine import RecoveryEngine
 
+from ai.agent.reflection_context import ReflectionContext
+from ai.agent.reflection_manager import ReflectionManager
+
 from ai.planner.condition_evaluator import ConditionEvaluator
 from ai.runtime.variable_resolver import VariableResolver
 from ai.verification.verification_manager import VerificationManager
@@ -46,6 +49,8 @@ class ExecutionEngine:
         self.recovery_engine = RecoveryEngine()
 
         self.resume_engine = ExecutionResumeEngine()
+
+        self.reflection_manager = ReflectionManager()
 
         self.controller = ExecutionController()
 
@@ -280,7 +285,7 @@ class ExecutionEngine:
 
         self.controller.complete()
 
-        return ExecutionResult(
+        result = ExecutionResult(
 
             success=True,
 
@@ -295,3 +300,45 @@ class ExecutionEngine:
             ),
 
         )
+    
+        ########################################################
+        # Reflect on successful execution
+        ########################################################
+        reflection_context = ReflectionContext(
+            execution_result=result,
+            objective="Execute workflow step",
+            workflow=resolved_context.workflow.name,
+        )
+        reflection = self.reflection_manager.reflect(
+            reflection_context,
+        )
+
+        print()
+
+        print("=" * 60)
+
+        print("REFLECTION")
+
+        print("=" * 60)
+
+        print("Reflection")
+
+        print(reflection.reflection)
+
+        print()
+
+        print("Learning")
+
+        print(reflection.learning)
+
+        print()
+
+        print("Stored")
+
+        print(reflection.should_store)
+
+        print()
+
+        return result
+        
+    
