@@ -6,9 +6,11 @@ from ai.actions.action_manager import ActionManager
 from ai.execution.execution_context import ExecutionContext
 from ai.execution.execution_result import ExecutionResult
 
-from ai.verification.verification_manager import VerificationManager
+from ai.planner.condition_evaluator import ConditionEvaluator
 
 from ai.runtime.variable_resolver import VariableResolver
+
+from ai.verification.verification_manager import VerificationManager
 
 
 class ExecutionEngine:
@@ -17,10 +19,11 @@ class ExecutionEngine:
 
     Responsibilities
     ----------------
+    • Resolve runtime variables
+    • Evaluate execution conditions
     • Execute actions
     • Execute verification
     • Apply execution policies
-    • Resolve runtime variables
     • Return ExecutionResult
 
     Future Responsibilities
@@ -29,6 +32,7 @@ class ExecutionEngine:
     • Timeout
     • Recovery
     • Waiting
+    • Logging
     """
 
     ############################################################
@@ -49,10 +53,14 @@ class ExecutionEngine:
         start = time.perf_counter()
 
         ########################################################
-        # Work on a copy of the step
+        # Work on a copy of the execution step
         ########################################################
 
-        step = deepcopy(context.step)
+        step = deepcopy(
+
+            context.step,
+
+        )
 
         ########################################################
         # Resolve runtime variables
@@ -65,7 +73,7 @@ class ExecutionEngine:
         )
 
         ########################################################
-        # Resolve every string parameter
+        # Resolve all string parameters
         ########################################################
 
         for key, value in step.parameters.items():
@@ -77,6 +85,16 @@ class ExecutionEngine:
                     value,
 
                 )
+
+        ########################################################
+        # Create condition evaluator
+        ########################################################
+
+        condition_evaluator = ConditionEvaluator(
+
+            context.runtime.runtime_variables,
+
+        )
 
         ########################################################
         # Create resolved execution context
@@ -101,7 +119,35 @@ class ExecutionEngine:
         )
 
         ########################################################
-        # Execute Action
+        # Evaluate execution condition
+        ########################################################
+
+        if resolved_context.step.condition is not None:
+
+            should_execute = condition_evaluator.evaluate(
+
+                resolved_context.step.condition,
+
+            )
+
+            if not should_execute:
+
+                return ExecutionResult(
+
+                    success=True,
+
+                    message="Step skipped (condition evaluated to False).",
+
+                    execution_time=(
+
+                        time.perf_counter() - start
+
+                    ),
+
+                )
+
+        ########################################################
+        # Execute action
         ########################################################
 
         action_result = self.action_manager.execute(
@@ -135,7 +181,7 @@ class ExecutionEngine:
             )
 
         ########################################################
-        # Verification
+        # Execute verification
         ########################################################
 
         if (
@@ -150,7 +196,7 @@ class ExecutionEngine:
 
             verification = self.verification_manager.verify(
 
-                resolved_context.step.verification_rule
+                resolved_context.step.verification_rule,
 
             )
 
@@ -174,6 +220,8 @@ class ExecutionEngine:
 
                 )
 
+        ########################################################
+        # Success
         ########################################################
 
         return ExecutionResult(

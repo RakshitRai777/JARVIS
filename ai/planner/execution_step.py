@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from ai.planner.condition import Condition
 from ai.verification.verification_rule import VerificationRule
 
 
@@ -21,6 +22,10 @@ class ExecutionStep:
     ############################################################
 
     description: str
+
+    ############################################################
+
+    condition: Condition | None = None
 
     ############################################################
     # Optional verification
