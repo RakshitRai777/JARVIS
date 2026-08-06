@@ -1,5 +1,5 @@
 from ai.runtime.runtime import Runtime
-
+import time
 
 def main():
 
@@ -18,7 +18,7 @@ def main():
     print("History    :", len(session1.history))
 
     ############################################################
-
+    time.sleep(1)
     runtime.reset()
 
     ############################################################
