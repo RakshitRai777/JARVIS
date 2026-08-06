@@ -5,6 +5,7 @@ from ai.runtime.runtime_session import RuntimeSession
 from ai.runtime.runtime_history_entry import (
     RuntimeHistoryEntry,
 )
+from ai.runtime.runtime_variables import RuntimeVariables
 
 class Runtime:
     """
@@ -31,6 +32,8 @@ class Runtime:
 
         self.history = RuntimeHistory()
 
+        self.variables = RuntimeVariables()
+
     ############################################################
 
     def reset(
@@ -47,6 +50,8 @@ class Runtime:
         self.session = RuntimeSession()
 
         self.history = self.session.history
+
+        self.variables = RuntimeVariables()
 
     ############################################################
 
@@ -195,3 +200,12 @@ class Runtime:
     ) -> RuntimeSession:
     
         return self.session
+
+    ############################################################
+    
+    @property
+    def runtime_variables(
+        self,
+    ) -> RuntimeVariables:
+    
+        return self.variables
