@@ -102,3 +102,89 @@ class RuntimeHistory:
             self._entries,
 
         )
+
+    ############################################################
+
+    def successful(
+            self,
+    ) -> list[RuntimeHistoryEntry]:
+        return[
+            entry 
+            for entry in self._entries
+            if entry.result.success
+        ]
+
+    ############################################################
+
+    def failed(
+        self,
+    ) -> list[RuntimeHistoryEntry]:
+        return[
+            entry 
+            for entry in self._entries
+            if not entry.result.success
+        ]
+
+    ############################################################
+
+    def last_success(
+        self,
+    ) -> RuntimeHistoryEntry | None:
+        for entry in reversed(
+            self._entries,
+        ):
+            if entry.result.success:
+                return entry
+        return None
+
+    ############################################################
+
+    def last_failure(
+        self,
+    ) -> RuntimeHistoryEntry | None:
+    
+        for entry in reversed(
+    
+            self._entries,
+    
+        ):
+    
+            if not entry.result.success:
+    
+                return entry
+    
+        return None
+
+    ############################################################
+
+    def by_action(
+        self,
+        action: str,
+    ) -> list[RuntimeHistoryEntry]:
+    
+        return [
+    
+            entry
+    
+            for entry in self._entries
+    
+            if entry.action == action
+    
+        ]
+
+    ############################################################
+
+    def by_workflow(
+        self,
+        workflow: str,
+    ) -> list[RuntimeHistoryEntry]:
+    
+        return [
+    
+            entry
+    
+            for entry in self._entries
+    
+            if entry.workflow == workflow
+    
+        ]
