@@ -2,7 +2,7 @@ from ai.tools.tool import Tool
 from ai.tools.tool_context import ToolContext
 from ai.tools.tool_result import ToolResult
 
-from ai.tools.desktop.keyboard_manager import KeyboardManager
+from ai.tools.desktop.keyboard_manager import Keyboard
 
 
 class TypeTextTool(Tool):
@@ -24,7 +24,7 @@ class TypeTextTool(Tool):
 
     def __init__(self):
 
-        self.keyboard = KeyboardManager()
+        self.keyboard = Keyboard()
 
     ############################################################
 
