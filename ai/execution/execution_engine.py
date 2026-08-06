@@ -6,6 +6,7 @@ from ai.execution.retry_engine import RetryEngine
 from ai.execution.retry_policy import RetryPolicy
 from ai.execution.execution_context import ExecutionContext
 from ai.execution.execution_result import ExecutionResult
+from ai.execution.recovery_engine import RecoveryEngine
 
 from ai.planner.condition_evaluator import ConditionEvaluator
 
@@ -45,6 +46,8 @@ class ExecutionEngine:
         self.verification_manager = VerificationManager()
 
         self.retry_engine = RetryEngine()
+
+        self.recovery_engine = RecoveryEngine()
 
     ############################################################
 
@@ -165,21 +168,19 @@ class ExecutionEngine:
         ########################################################
 
         if not action_result.success:
+            recovery = self.recovery_engine.recover(
+                context=resolved_context,
+                execution_result=action_result,
+            )
 
             return ExecutionResult(
-
                 success=False,
-
                 message=action_result.message,
-
+                data=recovery,
                 error=action_result.error,
-
                 execution_time=(
-
                     time.perf_counter() - start
-
                 ),
-
             )
 
         ########################################################
