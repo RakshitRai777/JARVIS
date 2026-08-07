@@ -38,6 +38,16 @@ class ReasoningEngine:
         )
 
         ########################################################
+        # Goal information
+        ########################################################
+
+        goal = (
+            context.planning_context
+            .goal_context
+            .current_goal
+        )
+
+        ########################################################
         # Build reasoning
         ########################################################
 
@@ -46,13 +56,28 @@ class ReasoningEngine:
             f"Command: {context.planning_context.command}"
         )
 
+        if goal is not None:
+            thought += (
+                f"\nActive Goal: {goal.title}"
+                f"\nGoal Status: {goal.status.name}"
+                f"\nProgress: {goal.progress}%"
+            )
+
         ########################################################
         # Continue existing work
         ########################################################
 
         if "continue" in command:
 
-            if summary and summary != "No relevant memories.":
+            if goal is not None:
+                conclusion = (
+                    f"Continue the active goal "
+                    f"'{goal.title}' "
+                    f"from {goal.progress}% progress." 
+                )
+                confidence = 0.98
+
+            elif summary and summary != "No relevant memories.":
 
                 conclusion = (
                     "Relevant memories found. "

@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-
+from ai.agent.goal_context import GoalContext
 from ai.memory.memory_context import MemoryContext
 
 
@@ -25,3 +25,9 @@ class PlanningContext:
     )
 
     memory_summary: str = ""
+
+    #############################################################
+
+    goal_context: GoalContext = field(
+        default_factory=GoalContext,
+    )
