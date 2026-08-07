@@ -1,40 +1,44 @@
-from enum import Enum, auto
+from dataclasses import dataclass, field
+from datetime import datetime
+
+from ai.project.task_status import TaskStatus
 
 
-class PlanningStrategyType(Enum):
+@dataclass(slots=True)
+class Task:
     """
-    High-level planning strategies selected
-    after reasoning.
+    Represents an executable unit of work
+    within a project.
     """
 
     ############################################################
 
-    DEFAULT = auto()
+    title: str = ""
 
     ############################################################
 
-    RESUME_PROJECT = auto()
+    description: str = ""
 
     ############################################################
 
-    RESUME_GOAL = auto()
+    status: TaskStatus = TaskStatus.PENDING
 
     ############################################################
 
-    CREATE_PROJECT = auto()
+    progress: float = 0.0
 
     ############################################################
 
-    CREATE_GOAL = auto()
+    priority: int = 0
 
     ############################################################
 
-    STORE_MEMORY = auto()
+    created_at: datetime = field(
+
+        default_factory=datetime.now,
+
+    )
 
     ############################################################
 
-    EXECUTE_TOOL = auto()
-
-    ############################################################
-
-    SYSTEM_COMMAND = auto()
+    completed_at: datetime | None = None

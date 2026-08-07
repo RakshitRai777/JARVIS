@@ -1,15 +1,12 @@
 from dataclasses import dataclass, field
-from ai.agent.goal_context import GoalContext
-from ai.memory.memory_context import MemoryContext
+
+from ai.agent.agent_state import AgentState
 
 
 @dataclass(slots=True)
 class PlanningContext:
     """
-    Context supplied to the planner.
-
-    Contains the user's command together
-    with any relevant memories.
+    Context supplied to the planning engine.
     """
 
     ############################################################
@@ -18,16 +15,10 @@ class PlanningContext:
 
     ############################################################
 
-    memory_context: MemoryContext = field(
-
-        default_factory=MemoryContext,
-
+    agent_state: AgentState = field(
+        default_factory=AgentState,
     )
+
+    ############################################################
 
     memory_summary: str = ""
-
-    #############################################################
-
-    goal_context: GoalContext = field(
-        default_factory=GoalContext,
-    )

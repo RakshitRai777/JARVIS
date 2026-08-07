@@ -7,6 +7,8 @@ def main():
     print("PLANNING STRATEGY TYPE")
     print("=" * 60)
 
+    print()
+
     for strategy in PlanningStrategyType:
 
         print(

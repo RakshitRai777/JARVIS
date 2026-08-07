@@ -8,7 +8,8 @@ from ai.planner.planning_strategy_type import (
 
 class PlanningStrategyBuilder:
     """
-    Converts a ReasoningResult into a PlanningStrategy.
+    Converts reasoning results into high-level
+    planning strategies.
     """
 
     ############################################################
@@ -21,50 +22,124 @@ class PlanningStrategyBuilder:
         conclusion = reasoning.conclusion.lower()
 
         ########################################################
-        # Resume existing goal
+        # Resume Project
+        ########################################################
+
+        if "active project" in conclusion:
+
+            return PlanningStrategy(
+
+                strategy=PlanningStrategyType.RESUME_PROJECT,
+
+                reason=reasoning.conclusion,
+
+                confidence=reasoning.confidence,
+
+            )
+
+        ########################################################
+        # Resume Goal
         ########################################################
 
         if "active goal" in conclusion:
 
-            strategy = PlanningStrategyType.RESUME_GOAL
+            return PlanningStrategy(
+
+                strategy=PlanningStrategyType.RESUME_GOAL,
+
+                reason=reasoning.conclusion,
+
+                confidence=reasoning.confidence,
+
+            )
 
         ########################################################
-        # Store memory
+        # Create Project
         ########################################################
 
-        elif "store" in conclusion:
+        if "create project" in conclusion:
 
-            strategy = PlanningStrategyType.STORE_MEMORY
+            return PlanningStrategy(
+
+                strategy=PlanningStrategyType.CREATE_PROJECT,
+
+                reason=reasoning.conclusion,
+
+                confidence=reasoning.confidence,
+
+            )
 
         ########################################################
-        # Execute tool
+        # Create Goal
         ########################################################
 
-        elif "tool" in conclusion:
+        if "create goal" in conclusion:
 
-            strategy = PlanningStrategyType.EXECUTE_TOOL
+            return PlanningStrategy(
+
+                strategy=PlanningStrategyType.CREATE_GOAL,
+
+                reason=reasoning.conclusion,
+
+                confidence=reasoning.confidence,
+
+            )
 
         ########################################################
-        # System command
+        # Store Memory
         ########################################################
 
-        elif "system" in conclusion:
+        if "memory" in conclusion:
 
-            strategy = PlanningStrategyType.SYSTEM_COMMAND
+            return PlanningStrategy(
+
+                strategy=PlanningStrategyType.STORE_MEMORY,
+
+                reason=reasoning.conclusion,
+
+                confidence=reasoning.confidence,
+
+            )
+
+        ########################################################
+        # Execute Tool
+        ########################################################
+
+        if "tool" in conclusion:
+
+            return PlanningStrategy(
+
+                strategy=PlanningStrategyType.EXECUTE_TOOL,
+
+                reason=reasoning.conclusion,
+
+                confidence=reasoning.confidence,
+
+            )
+
+        ########################################################
+        # System Command
+        ########################################################
+
+        if "system" in conclusion:
+
+            return PlanningStrategy(
+
+                strategy=PlanningStrategyType.SYSTEM_COMMAND,
+
+                reason=reasoning.conclusion,
+
+                confidence=reasoning.confidence,
+
+            )
 
         ########################################################
         # Default
         ########################################################
 
-        else:
-
-            strategy = PlanningStrategyType.DEFAULT
-
-        ########################################################
-
         return PlanningStrategy(
 
-            strategy=strategy,
+            strategy=PlanningStrategyType.DEFAULT,
 
             reason=reasoning.conclusion,
 

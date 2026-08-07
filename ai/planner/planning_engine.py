@@ -1,6 +1,10 @@
+from ai.agent.agent_state import AgentState
+from ai.agent.goal_manager import GoalManager
 from ai.agent.reasoning_context import ReasoningContext
-from ai.agent.reasoning_engine import (ReasoningEngine as AgentReasoningEngine,)
-
+from ai.agent.reasoning_engine import (
+    ReasoningEngine as AgentReasoningEngine,
+)
+from ai.project.project_manager import ProjectManager
 from ai.memory.memory_retriever import MemoryRetriever
 
 from ai.planner.execution_plan import ExecutionPlan
@@ -9,11 +13,13 @@ from ai.planner.plan_builder import PlanBuilder
 from ai.planner.planner import Planner
 from ai.planner.planner_advisor import PlannerAdvisor
 from ai.planner.planning_context import PlanningContext
-from ai.planner.reasoning_engine import (ReasoningEngine as PlanReasoningEngine,)
-from ai.agent.goal_manager import GoalManager
 from ai.planner.planning_strategy_builder import (
     PlanningStrategyBuilder,
 )
+from ai.planner.reasoning_engine import (
+    ReasoningEngine as PlanReasoningEngine,
+)
+
 
 class PlanningEngine:
     """
@@ -22,9 +28,11 @@ class PlanningEngine:
     Responsibilities
     ----------------
     • Retrieve relevant memories
-    • Build planning context
-    • Enrich context
+    • Build AgentState
+    • Build PlanningContext
+    • Enrich planning context
     • Perform reasoning
+    • Build planning strategy
     • Parse goals
     • Ask Planner for decisions
     • Build execution steps
@@ -45,19 +53,29 @@ class PlanningEngine:
 
         self.goal_manager = GoalManager()
 
-        self.advisor = PlannerAdvisor(goal_manager=self.goal_manager,)
+        self.project_manager = ProjectManager()
+
+        self.advisor = PlannerAdvisor(
+
+            goal_manager=self.goal_manager,
+            project_manager=self.project_manager,
+
+        )
 
         ########################################################
-        # Agent reasoning (think before planning)
+        # Agent reasoning
         ########################################################
 
         self.reasoning_engine = AgentReasoningEngine()
 
         ########################################################
-        # Planner reasoning (improve execution plan)
+        # Planner reasoning
         ########################################################
 
         self.plan_reasoning = PlanReasoningEngine()
+
+        ########################################################
+
         self.strategy_builder = PlanningStrategyBuilder()
 
     ############################################################
@@ -68,20 +86,28 @@ class PlanningEngine:
     ) -> ExecutionPlan:
 
         ########################################################
-        # Backward compatibility
+        # Build Planning Context
         ########################################################
 
         if isinstance(request, str):
+
+            memory_context = self.memory_retriever.retrieve(
+
+                request,
+
+            )
+
+            agent_state = AgentState(
+
+                memory_context=memory_context,
+
+            )
 
             context = PlanningContext(
 
                 command=request,
 
-                memory_context=self.memory_retriever.retrieve(
-
-                    request,
-
-                ),
+                agent_state=agent_state,
 
             )
 
@@ -105,7 +131,9 @@ class PlanningEngine:
 
         reasoning_context = ReasoningContext(
 
-            planning_context=context,
+            command=context.command,
+
+            agent_state=context.agent_state,
 
             objective="Determine the best planning strategy",
 
@@ -122,8 +150,14 @@ class PlanningEngine:
         ########################################################
 
         strategy = self.strategy_builder.build(
+
             reasoning,
+
         )
+
+        ########################################################
+        # Temporary Debug
+        ########################################################
 
         print()
 
@@ -132,19 +166,16 @@ class PlanningEngine:
         print("=" * 60)
 
         print("Strategy")
-
         print(strategy.strategy.name)
 
         print()
 
         print("Reason")
-
         print(strategy.reason)
 
         print()
 
         print("Confidence")
-
         print(strategy.confidence)
 
         print()

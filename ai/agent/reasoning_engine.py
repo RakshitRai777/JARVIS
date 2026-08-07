@@ -6,11 +6,10 @@ class ReasoningEngine:
     """
     Performs high-level reasoning before planning.
 
-    Version 2
+    Version 3
     ---------
-    Uses the user's command together with the
-    retrieved memory summary to generate an
-    intelligent conclusion.
+    Uses the AgentState to reason about the user's
+    current situation before planning.
 
     Future
     ------
@@ -27,40 +26,63 @@ class ReasoningEngine:
         context: ReasoningContext,
     ) -> ReasoningResult:
 
-        command = (
-            context.planning_context.command
-            .lower()
-            .strip()
-        )
+        command = context.command.lower().strip()
 
-        summary = (
-            context.planning_context.memory_summary
-        )
+        ########################################################
+        # Memory summary
+        ########################################################
+
+        memories = context.agent_state.memory_context
+
+        if memories.count:
+
+            summary = "\n".join(
+
+                memory.content
+
+                for memory in memories.memories
+
+            )
+
+        else:
+
+            summary = "No relevant memories."
 
         ########################################################
         # Goal information
         ########################################################
 
-        goal = (
-            context.planning_context
-            .goal_context
-            .current_goal
-        )
+        goal = context.agent_state.goal_context.current_goal
 
         ########################################################
-        # Build reasoning
+        # Project information
+        ########################################################
+
+        project = context.agent_state.active_project
+
+        ########################################################
+        # Build reasoning thought
         ########################################################
 
         thought = (
             f"Objective: {context.objective}\n"
-            f"Command: {context.planning_context.command}"
+            f"Command: {context.command}"
         )
 
         if goal is not None:
+
             thought += (
                 f"\nActive Goal: {goal.title}"
                 f"\nGoal Status: {goal.status.name}"
                 f"\nProgress: {goal.progress}%"
+            )
+
+        if project is not None:
+
+            thought += (
+                f"\nActive Project: {project.name}"
+                f"\nProject Status: {project.status.name}"
+                f"\nProject Progress: {project.progress}%"
             )
 
         ########################################################
@@ -69,15 +91,27 @@ class ReasoningEngine:
 
         if "continue" in command:
 
-            if goal is not None:
+            if project is not None:
+
+                conclusion = (
+                    f"Continue the active project "
+                    f"'{project.name}' "
+                    f"from {project.progress}% progress."
+                )
+
+                confidence = 0.99
+
+            elif goal is not None:
+
                 conclusion = (
                     f"Continue the active goal "
                     f"'{goal.title}' "
-                    f"from {goal.progress}% progress." 
+                    f"from {goal.progress}% progress."
                 )
+
                 confidence = 0.98
 
-            elif summary and summary != "No relevant memories.":
+            elif summary != "No relevant memories.":
 
                 conclusion = (
                     "Relevant memories found. "

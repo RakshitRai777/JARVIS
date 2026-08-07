@@ -1,11 +1,12 @@
 from datetime import datetime
 
-from ai.agent.goal import Goal
-from ai.agent.goal_status import GoalStatus
-
 from ai.memory.memory import Memory
 from ai.memory.memory_service import MemoryService
 from ai.memory.memory_type import MemoryType
+
+from ai.agent.goal_manager import GoalManager
+
+from ai.project.project_manager import ProjectManager
 
 from ai.planner.planning_engine import PlanningEngine
 
@@ -13,15 +14,11 @@ from ai.planner.planning_engine import PlanningEngine
 def main():
 
     ########################################################
-    # Reset memory
-    ########################################################
 
     service = MemoryService()
 
     service.clear()
 
-    ########################################################
-    # Store long-term memory
     ########################################################
 
     service.remember(
@@ -39,44 +36,64 @@ def main():
     )
 
     ########################################################
-    # Create planning engine
+    # Goal
+    ########################################################
+
+    goal_manager = GoalManager()
+
+    goal = goal_manager.create_goal(
+
+        "Build FitOS",
+
+        "Complete the FitOS project.",
+
+    )
+
+    goal_manager.activate(goal)
+
+    goal.progress = 45.0
+
+    ########################################################
+    # Project
+    ########################################################
+
+    project_manager = ProjectManager()
+
+    project = project_manager.create_project(
+
+        "FitOS",
+
+        "AI Operating System",
+
+    )
+
+    project_manager.activate(project)
+
+    project.progress = 75.0
+
     ########################################################
 
     engine = PlanningEngine()
 
     ########################################################
-    # Create active goal
-    ########################################################
 
-    goal = engine.goal_manager.create_goal(
+    engine.goal_manager = goal_manager
 
-        title="Build FitOS",
+    engine.project_manager = project_manager
 
-        description="Complete the FitOS project.",
+    engine.advisor.goal_manager = goal_manager
 
-    )
+    engine.advisor.project_manager = project_manager
 
-    engine.goal_manager.activate(
-
-        goal,
-
-    )
-
-    engine.goal_manager.update_progress(
-
-        goal,
-
-        45.0,
-
-    )
-
-    ########################################################
-    # Execute planning
     ########################################################
 
     print("=" * 60)
+
     print("GOAL-AWARE REASONING")
+
     print("=" * 60)
+
+    ########################################################
 
     plan = engine.build_plan(
 
@@ -85,30 +102,32 @@ def main():
     )
 
     ########################################################
-    # Display active goal
+
+    state = engine.advisor.project_manager.get_active_project()
+
+    if state:
+
+        print()
+
+        print("Project")
+
+        print(state.name)
+
+        print()
+
+        print("Status")
+
+        print(state.status.name)
+
+        print()
+
+        print("Progress")
+
+        print(state.progress)
+
     ########################################################
 
     print()
-
-    print("=" * 60)
-    print("ACTIVE GOAL")
-    print("=" * 60)
-
-    print("Title      :", goal.title)
-
-    print("Status     :", goal.status.name)
-
-    print("Progress   :", goal.progress)
-
-    ########################################################
-    # Display execution plan
-    ########################################################
-
-    print()
-
-    print("=" * 60)
-    print("EXECUTION PLAN")
-    print("=" * 60)
 
     print("Steps :", len(plan.steps))
 

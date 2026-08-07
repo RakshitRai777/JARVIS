@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from ai.planner.planning_context import PlanningContext
+from ai.agent.agent_state import AgentState
 
 
 @dataclass(slots=True)
@@ -11,10 +11,12 @@ class ReasoningContext:
 
     ############################################################
 
-    planning_context: PlanningContext = field(
+    command: str = ""
 
-        default_factory=PlanningContext,
+    ############################################################
 
+    agent_state: AgentState = field(
+        default_factory=AgentState,
     )
 
     ############################################################

@@ -15,12 +15,14 @@ def main():
 
         success=True,
 
+        thought="Continue FitOS",
+
         conclusion=(
-            "Continue the active goal "
-            "'Build FitOS' from 45% progress."
+            "Continue the active project "
+            "'FitOS' from 75.0% progress."
         ),
 
-        confidence=0.98,
+        confidence=0.99,
 
     )
 
@@ -38,11 +40,23 @@ def main():
     print("PLANNING STRATEGY BUILDER")
     print("=" * 60)
 
-    print("Strategy   :", strategy.strategy.name)
+    print()
 
-    print("Reason     :", strategy.reason)
+    print("Strategy")
 
-    print("Confidence :", strategy.confidence)
+    print(strategy.strategy.name)
+
+    print()
+
+    print("Reason")
+
+    print(strategy.reason)
+
+    print()
+
+    print("Confidence")
+
+    print(strategy.confidence)
 
 
 if __name__ == "__main__":
