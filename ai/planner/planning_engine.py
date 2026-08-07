@@ -4,8 +4,10 @@ from ai.agent.reasoning_context import ReasoningContext
 from ai.agent.reasoning_engine import (
     ReasoningEngine as AgentReasoningEngine,
 )
-from ai.project.project_manager import ProjectManager
+
 from ai.memory.memory_retriever import MemoryRetriever
+
+from ai.project.project_manager import ProjectManager
 
 from ai.planner.execution_plan import ExecutionPlan
 from ai.planner.goal_parser import GoalParser
@@ -15,6 +17,9 @@ from ai.planner.planner_advisor import PlannerAdvisor
 from ai.planner.planning_context import PlanningContext
 from ai.planner.planning_strategy_builder import (
     PlanningStrategyBuilder,
+)
+from ai.planner.project_plan_builder import (
+    ProjectPlanBuilder,
 )
 from ai.planner.reasoning_engine import (
     ReasoningEngine as PlanReasoningEngine,
@@ -33,10 +38,8 @@ class PlanningEngine:
     • Enrich planning context
     • Perform reasoning
     • Build planning strategy
-    • Parse goals
-    • Ask Planner for decisions
-    • Build execution steps
-    • Improve the execution plan
+    • Build execution plans
+    • Improve execution plans
     """
 
     ############################################################
@@ -49,6 +52,8 @@ class PlanningEngine:
 
         self.builder = PlanBuilder()
 
+        self.project_builder = ProjectPlanBuilder()
+
         self.memory_retriever = MemoryRetriever()
 
         self.goal_manager = GoalManager()
@@ -58,6 +63,7 @@ class PlanningEngine:
         self.advisor = PlannerAdvisor(
 
             goal_manager=self.goal_manager,
+
             project_manager=self.project_manager,
 
         )
@@ -181,7 +187,47 @@ class PlanningEngine:
         print()
 
         ########################################################
-        # Build execution plan
+        # Project-aware planning
+        ########################################################
+
+        if strategy.strategy.name == "RESUME_PROJECT":
+
+            ####################################################
+            # Ask ProjectManager for the active project
+            ####################################################
+
+            project = self.project_manager.get_active_project()
+
+            if project is not None:
+
+                ################################################
+                # Ask ProjectManager for the next task
+                ################################################
+
+                task = self.project_manager.get_active_task(
+
+                    project,
+
+                )
+
+                ################################################
+
+                if task is not None:
+
+                    plan = self.project_builder.build(
+
+                        task,
+
+                    )
+
+                    return self.plan_reasoning.improve(
+
+                        plan,
+
+                    )
+
+        ########################################################
+        # Default planning
         ########################################################
 
         plan = ExecutionPlan()

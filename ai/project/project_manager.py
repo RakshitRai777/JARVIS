@@ -1,9 +1,10 @@
 from datetime import datetime
 
+from ai.project.milestone import Milestone
 from ai.project.project import Project
 from ai.project.project_status import ProjectStatus
-from ai.project.milestone import Milestone
-
+from ai.project.task import Task
+from ai.project.task_selector import TaskSelector
 
 class ProjectManager:
     """
@@ -16,7 +17,7 @@ class ProjectManager:
 
         self._projects: list[Project] = []
 
-        self._milestones: dict[str, list[Milestone]] = {}
+        self.task_selector = TaskSelector()
 
     ############################################################
 
@@ -34,9 +35,11 @@ class ProjectManager:
 
         )
 
-        self._projects.append(project)
+        self._projects.append(
 
-        self._milestones[name] = []
+            project,
+
+        )
 
         return project
 
@@ -85,41 +88,21 @@ class ProjectManager:
         milestone: Milestone,
     ) -> None:
 
-        self._milestones.setdefault(
-
-            project.name,
-
-            [],
-
-        ).append(
+        project.milestones.append(
 
             milestone,
 
         )
 
         ########################################################
-        # Automatically update project progress
+        # Update project progress
         ########################################################
 
-        milestones = self._milestones[project.name]
+        self.update_progress(
 
-        if milestones:
+            project,
 
-            project.progress = (
-
-                sum(
-
-                    m.progress
-
-                    for m in milestones
-
-                )
-
-                /
-
-                len(milestones)
-
-            )
+        )
 
     ############################################################
 
@@ -128,11 +111,78 @@ class ProjectManager:
         project: Project,
     ) -> list[Milestone]:
 
-        return self._milestones.get(
+        return project.milestones
 
-            project.name,
+    ############################################################
 
-            [],
+    def get_milestone_count(
+        self,
+        project: Project,
+    ) -> int:
+
+        return len(
+
+            project.milestones,
+
+        )
+
+    ############################################################
+
+    def get_active_milestone(
+        self,
+        project: Project,
+    ) -> Milestone | None:
+
+        for milestone in project.milestones:
+
+            if not milestone.completed:
+
+                return milestone
+
+        return None
+
+
+    ############################################################
+    
+    def get_active_task(
+        self,
+        project: Project,
+    ) -> Task | None:
+        milestone = self.get_active_milestone(
+            project,
+        )
+        if milestone is None:
+            return None
+        return self.task_selector.select(
+            [milestone],
+        )
+
+    ############################################################
+
+    def update_progress(
+        self,
+        project: Project,
+    ) -> None:
+
+        if not project.milestones:
+
+            project.progress = 0.0
+
+            return
+
+        project.progress = (
+
+            sum(
+
+                milestone.progress
+
+                for milestone in project.milestones
+
+            )
+
+            /
+
+            len(project.milestones)
 
         )
 

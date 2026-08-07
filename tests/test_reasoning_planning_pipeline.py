@@ -7,6 +7,9 @@ from ai.memory.memory_type import MemoryType
 from ai.agent.goal_manager import GoalManager
 
 from ai.project.project_manager import ProjectManager
+from ai.project.milestone import Milestone
+from ai.project.task import Task
+from ai.project.task_status import TaskStatus
 
 from ai.planner.planning_engine import PlanningEngine
 
@@ -14,12 +17,12 @@ from ai.planner.planning_engine import PlanningEngine
 def main():
 
     ########################################################
+    # Memory
+    ########################################################
 
     service = MemoryService()
 
     service.clear()
-
-    ########################################################
 
     service.remember(
 
@@ -72,10 +75,86 @@ def main():
     project.progress = 75.0
 
     ########################################################
+    # Milestone
+    ########################################################
 
-    engine = PlanningEngine()
+    milestone = Milestone(
+
+        title="Project Intelligence",
+
+        description="Build the Project subsystem.",
+
+    )
 
     ########################################################
+    # Tasks
+    ########################################################
+
+    milestone.add_task(
+
+        Task(
+
+            title="ProjectStatus",
+
+            status=TaskStatus.COMPLETED,
+
+            progress=100,
+
+            priority=1,
+
+        )
+
+    )
+
+    milestone.add_task(
+
+        Task(
+
+            title="Project",
+
+            status=TaskStatus.COMPLETED,
+
+            progress=100,
+
+            priority=1,
+
+        )
+
+    )
+
+    milestone.add_task(
+
+        Task(
+
+            title="Implement ProjectManager",
+
+            status=TaskStatus.ACTIVE,
+
+            progress=40,
+
+            priority=5,
+
+        )
+
+    )
+
+    ########################################################
+    # Attach milestone to project
+    ########################################################
+
+    project_manager.add_milestone(
+
+        project,
+
+        milestone,
+
+    )
+
+    ########################################################
+    # Planning Engine
+    ########################################################
+
+    engine = PlanningEngine()
 
     engine.goal_manager = goal_manager
 
@@ -89,7 +168,7 @@ def main():
 
     print("=" * 60)
 
-    print("GOAL-AWARE REASONING")
+    print("PROJECT-AWARE PLANNING")
 
     print("=" * 60)
 
@@ -103,29 +182,17 @@ def main():
 
     ########################################################
 
-    state = engine.advisor.project_manager.get_active_project()
+    print()
 
-    if state:
+    print("Project")
 
-        print()
+    print(project.name)
 
-        print("Project")
+    print()
 
-        print(state.name)
+    print("Milestones")
 
-        print()
-
-        print("Status")
-
-        print(state.status.name)
-
-        print()
-
-        print("Progress")
-
-        print(state.progress)
-
-    ########################################################
+    print(len(project.milestones))
 
     print()
 
